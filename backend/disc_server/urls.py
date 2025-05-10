@@ -7,12 +7,13 @@ from rest_framework import routers
 from university import views
 
 router = routers.DefaultRouter()
-router.register(r'topics', views.CourseTopicViewSet)
-router.register(r'subtopics', views.SubtopicViewSet)
-router.register(r'labs', views.LabViewSet)
-router.register(r'users', views.UserViewSet)
-router.register(r'assignments', views.AssignmentViewSet)
-router.register(r'attempts', views.AttemptViewSet)
+router.register(r'courses', views.CoursesViewSet)
+router.register(r'labs', views.LabsViewSet)
+router.register(r'progress', views.ProgressViewSet)
+router.register(r'solutions', views.SolutionsViewSet)
+router.register(r'steps', views.StepsViewSet)
+router.register(r'students', views.StudentsViewSet)
+router.register(r'teachers', views.TeachersViewSet)
 
 urlpatterns = [
     path('', RedirectView.as_view(url='/api/', permanent=False)),

@@ -10,10 +10,10 @@ import AddStudentsPage from './students/AddStudentsPage.jsx';
 import AddAttemptsPage from './students/AddAttemptsPage.jsx';
 import RemoveStudentsPage from './students/RemoveStudentsPage.jsx';
 import StudentResultsPage from './students/StudentResultsPage.jsx';
-import './App.css';
 import ModuleCourse from "./components/ModuleCourse/ModuleCourse.jsx";
 import LoginRegisterPage from "./pages/LoginRegister/LoginRegister.jsx";
 import ModuleCoursePage from "./pages/ModuleCoursePage/ModuleCoursePage.jsx";
+import './App.css';
 
 
 const App = () => {

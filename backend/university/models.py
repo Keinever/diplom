@@ -1,82 +1,86 @@
 from django.db import models
 
-# Модель для тем курса
-class CourseTopic(models.Model):
-    topic_id = models.AutoField(primary_key=True)
-    topic_name = models.CharField(max_length=100)
+
+class Courses(models.Model):
+    course_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
 
     class Meta:
-        db_table = 'course_topics'
+        db_table = 'Courses'
 
-    def __str__(self):
-        return self.topic_name
-
-# Модель для подтем
-class Subtopic(models.Model):
-    subtopic_id = models.AutoField(primary_key=True)
-    topic = models.ForeignKey(CourseTopic, on_delete=models.CASCADE, to_field='topic_id')
-    subtopic_name = models.CharField(max_length=100)
-
-    class Meta:
-        db_table = 'subtopics'
-
-    def __str__(self):
-        return f"{self.topic.topic_name} - {self.subtopic_name}"
-
-# Модель для лабораторных работ
-class Lab(models.Model):
+class Labs(models.Model):
     lab_id = models.AutoField(primary_key=True)
-    subtopic = models.ForeignKey(Subtopic, on_delete=models.CASCADE, to_field='subtopic_id')
-    lab_name = models.CharField(max_length=100)
-    have_attestation = models.BooleanField(default=True)
-    have_training = models.BooleanField(default=True)
+    course = models.ForeignKey(Courses, models.DO_NOTHING)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    due_date = models.DateTimeField()
+    total_points = models.IntegerField()
+    attempts_limit = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        db_table = 'labs'
+        db_table = 'Labs'
 
-    def __str__(self):
-        return self.lab_name
 
-# Модель для пользователей
-class User(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    full_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    isu_id = models.CharField(max_length=6, unique=True)
-    role = models.CharField(max_length=20, choices=[('student', 'Student'), ('teacher', 'Teacher'), ('admin', 'Admin')])
-    group_name = models.CharField(max_length=50, blank=True, null=True)
+class Progress(models.Model):
+    progress_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey('Students', models.DO_NOTHING)
+    course = models.ForeignKey(Courses, models.DO_NOTHING)
+    completed_labs = models.IntegerField(blank=True, null=True)
+    total_labs = models.IntegerField(blank=True, null=True)
+    average_grade = models.FloatField(blank=True, null=True)
 
     class Meta:
-        db_table = 'users'
+        db_table = 'Progress'
 
-    def __str__(self):
-        return f"{self.full_name} ({self.role})"
 
-# Модель для заданий
-class Assignment(models.Model):
-    assignment_id = models.AutoField(primary_key=True)
-    lab = models.ForeignKey(Lab, on_delete=models.CASCADE, to_field='lab_id')
-    is_exam = models.BooleanField(default=False)
-    deadline = models.DateTimeField()
-
-    class Meta:
-        db_table = 'assignments'
-
-    def __str__(self):
-        return f"{self.lab.lab_name} - Deadline: {self.deadline}"
-
-# Модель для попыток выполнения заданий
-class Attempt(models.Model):
-    attempt_id = models.AutoField(primary_key=True)
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, to_field='assignment_id')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='user_id')
-    start_time = models.DateTimeField(auto_now_add=True)
-    end_time = models.DateTimeField(blank=True, null=True)
-    score = models.IntegerField(blank=True, null=True)
-    is_passed = models.BooleanField(default=False)
+class Solutions(models.Model):
+    solution_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey('Students', models.DO_NOTHING)
+    lab = models.ForeignKey(Labs, models.DO_NOTHING)
+    solution_data = models.TextField(blank=True, null=True)
+    grade = models.IntegerField(blank=True, null=True)
+    submitted_at = models.DateTimeField(blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
+    attempts_left = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        db_table = 'attempts'
+        db_table = 'Solutions'
 
-    def __str__(self):
-        return f"{self.user.full_name} - {self.assignment.lab.lab_name} (Score: {self.score})"
+
+class Steps(models.Model):
+    step_id = models.AutoField(primary_key=True)
+    title = models.TextField()
+    description = models.TextField()
+    exercise_type = models.CharField(max_length=50)
+    lab_number = models.ForeignKey(Labs, models.DO_NOTHING, db_column='lab_number', blank=True, null=True)
+    step_file = models.BinaryField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'Steps'
+
+
+class Students(models.Model):
+    student_id = models.AutoField(primary_key=True)
+    group = models.CharField(max_length=15)
+    isu_id = models.CharField(unique=True, max_length=20)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.CharField(unique=True, max_length=255)
+    middle_name = models.CharField(max_length=100, blank=True, null=True)
+    course = models.ForeignKey(Courses, models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        db_table = 'Students'
+
+
+class Teachers(models.Model):
+    teacher_id = models.AutoField(primary_key=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.CharField(unique=True, max_length=255)
+    middle_name = models.CharField(max_length=50, blank=True, null=True)
+    course = models.ForeignKey(Courses, models.DO_NOTHING)
+
+    class Meta:
+        db_table = 'Teachers'

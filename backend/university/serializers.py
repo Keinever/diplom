@@ -1,32 +1,37 @@
 from rest_framework import serializers
 from .models import *
 
-class CourseTopicSerializer(serializers.ModelSerializer):
+class CoursesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CourseTopic
+        model = Courses
         fields = '__all__'
 
-class SubtopicSerializer(serializers.ModelSerializer):
+class LabsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Subtopic
+        model = Labs
         fields = '__all__'
 
-class LabSerializer(serializers.ModelSerializer):
+class ProgressSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Lab
+        model = Progress
         fields = '__all__'
 
-class UserSerializer(serializers.ModelSerializer):
+class SolutionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Solutions
         fields = '__all__'
 
-class AssignmentSerializer(serializers.ModelSerializer):
+class StepsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Assignment
+        model = Steps
         fields = '__all__'
 
-class AttemptSerializer(serializers.ModelSerializer):
+class StudentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Attempt
+        model = Students
+        fields = '__all__'
+
+class TeachersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teachers
         fields = '__all__'
