@@ -6,11 +6,6 @@ class CoursesSerializer(serializers.ModelSerializer):
         model = Courses
         fields = '__all__'
 
-class LabsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Labs
-        fields = '__all__'
-
 class ProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Progress

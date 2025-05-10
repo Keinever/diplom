@@ -10,11 +10,6 @@ class CoursesViewSet(viewsets.ModelViewSet):
     serializer_class = CoursesSerializer
 
 
-class LabsViewSet(viewsets.ModelViewSet):
-    queryset = Labs.objects.all()
-    serializer_class = LabsSerializer
-
-
 class ProgressViewSet(viewsets.ModelViewSet):
     queryset = Progress.objects.all()
     serializer_class = ProgressSerializer

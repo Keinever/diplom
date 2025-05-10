@@ -8,7 +8,6 @@ from university import views
 
 router = routers.DefaultRouter()
 router.register(r'courses', views.CoursesViewSet)
-router.register(r'labs', views.LabsViewSet)
 router.register(r'progress', views.ProgressViewSet)
 router.register(r'solutions', views.SolutionsViewSet)
 router.register(r'steps', views.StepsViewSet)
