@@ -13,7 +13,7 @@ export default function LoginRegister() {
     };
 
     return (
-        <div className="border-2 bg-white">
+        <div className="border-2 bg-white my-4">
             <Box className="px-10">
                 <Tabs
                     centered

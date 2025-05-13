@@ -1,7 +1,9 @@
 import {useState} from "react";
+import api, {get_csrf} from "../../../api.js";
 
 export default function Register() {
-    const [username, setUsername] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [password2, setPassword2] = useState("");
@@ -9,24 +11,62 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        console.log(username, password, password2);
-    };
+        try {
+            const csrfToken = get_csrf();
+
+            const res = await api.post('api-auth/register/', {
+                    email: email,
+                    password: password,
+                    first_name: firstName,
+                    last_name: lastName,
+                },
+                {
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+            if (res.status === 201) {
+                window.location.reload()
+            }
+        } catch (error) {
+            console.log(error)
+            setPassword("")
+            setPassword2("")
+        }
+    }
     return (
         <div className="flex justify-center my-5">
             <form onSubmit={handleSubmit} className="form-container flex flex-col justify-between">
                 <div>
                     <div className="flex flex-col mb-4">
                         <label
-                            htmlFor="username"
+                            htmlFor="name"
                             className="text-gray-500 font-light text-xs"
                         >
-                            Имя пользователя
+                            First Name
                         </label>
                         <input
                             className="form-input border-2 rounded-lg p-1"
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            type="name"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                        />
+
+                    </div>
+                    <div className="flex flex-col mb-4">
+                        <label
+                            htmlFor="lastname"
+                            className="text-gray-500 font-light text-xs"
+                        >
+                            Last Name
+                        </label>
+                        <input
+                            className="form-input border-2 rounded-lg p-1"
+                            type="lastname"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
                         />
 
                     </div>
@@ -76,7 +116,7 @@ export default function Register() {
                         </label>
                         <input
                             className="form-input border-2 rounded-lg p-1"
-                            type="passwordconfirm"
+                            type="password"
                             value={password2}
                             onChange={(e) => setPassword2(e.target.value)}
                         />

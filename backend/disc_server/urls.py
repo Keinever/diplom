@@ -18,5 +18,8 @@ urlpatterns = [
     path('', RedirectView.as_view(url='/api/', permanent=False)),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls')),
+    path('api-auth/register/', views.register, name='register'),
+    path('api-auth/login/', views.custom_login, name='login'),
+    path('api-auth/logout/', views.custom_logout, name='logout'),
+    path('api/csrf_token/', views.get_csrf, name='csrf_token'),
 ]

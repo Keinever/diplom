@@ -1,12 +1,32 @@
 import {useState} from "react";
+import api, {get_csrf} from "../../../api.js";
+import {useNavigate} from "react-router-dom";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    };
+
+        try {
+            const csrfToken = get_csrf();
+
+            const res = await api.post('api-auth/login/', {email: email, password: password}, {
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (res.status === 200) {
+                navigate('/courses')
+            }
+        } catch (error) {
+            console.log(error);
+            setPassword("");
+        }
+    }
     return (
         <div className="flex justify-center my-5">
             <form onSubmit={handleSubmit} className="form-container flex flex-col justify-between">
