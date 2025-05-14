@@ -1,18 +1,16 @@
-from django.shortcuts import render
-
-# Create your views here.
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.db import transaction, IntegrityError
+from django.contrib.auth import authenticate, login, logout
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 from .models import *
 from .serializers import *
 
 class CoursesViewSet(viewsets.ModelViewSet):
     queryset = Courses.objects.all()
     serializer_class = CoursesSerializer
-
-
-class LabsViewSet(viewsets.ModelViewSet):
-    queryset = Labs.objects.all()
-    serializer_class = LabsSerializer
 
 
 class ProgressViewSet(viewsets.ModelViewSet):
@@ -31,10 +29,76 @@ class StepsViewSet(viewsets.ModelViewSet):
 
 
 class StudentsViewSet(viewsets.ModelViewSet):
-    queryset = Students.objects.all()
+    queryset = StudentProfile.objects.all()
     serializer_class = StudentsSerializer
 
 
 class TeachersViewSet(viewsets.ModelViewSet):
-    queryset = Teachers.objects.all()
+    queryset = TeacherProfile.objects.all()
     serializer_class = TeachersSerializer
+
+
+@api_view(['POST'])
+@transaction.atomic
+def register(request):
+    try:
+        with transaction.atomic():  # Контекстный менеджер для части кода
+            serializer = StudentRegistrationSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            user = CustomUser.objects.create_user(
+                email=serializer.validated_data['email'],
+                password=serializer.validated_data['password'],
+                role='student',
+                first_name=serializer.validated_data['first_name'],
+                last_name=serializer.validated_data['last_name']
+            )
+
+            StudentProfile.objects.create(
+                user=user,
+                email=serializer.validated_data['email'],
+                first_name=serializer.validated_data['first_name'],
+                last_name=serializer.validated_data['last_name'],
+            )
+
+            return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
+
+    except IntegrityError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': 'Registration failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def custom_login(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    user = authenticate(request, email=email, password=password)
+
+    if user is None:
+        return Response(
+            {'detail': 'Invalid credentials'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    if not user.is_active:
+        return Response(
+            {'detail': 'Account disabled'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    login(request, user)
+    return Response({'detail': 'login success', 'data': {'role': user.role}}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def custom_logout(request):
+    logout(request)
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+def get_csrf(request):
+    response = JsonResponse({'detail': 'CSRF cookie set'})
+    response['X-CSRFToken'] = get_token(request)
+    return response

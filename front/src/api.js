@@ -1,23 +1,20 @@
 import axios from "axios";
-import { ACCESS_TOKEN } from "./constants";
+import Cookies from 'js-cookie';
 
 const apiUrl = "http://localhost:8000";
 
+export function get_csrf() {
+  return Cookies.get('csrftoken');
+}
+
 const api = axios.create({
   baseURL: import.meta.env.BACKEND_API_URL ? import.meta.env.BACKEND_API_URL : apiUrl,
+  withCredentials: true,
+  xsrfCookieName: 'csrftoken',
+  xsrfHeaderName: 'X-CSRFToken',
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem(ACCESS_TOKEN);
-    if (token) {
-      config.headers.Authorization = `JWT ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+api.get('/api/csrf_token/')
+    .catch(error => console.error('CSRF token fetch error:', error));
 
 export default api;
