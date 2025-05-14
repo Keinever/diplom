@@ -13,6 +13,8 @@ import StudentResultsPage from './students/StudentResultsPage.jsx';
 import ModuleCourse from "./components/ModuleCourse/ModuleCourse.jsx";
 import LoginRegisterPage from "./pages/LoginRegister/LoginRegister.jsx";
 import ModuleCoursePage from "./pages/ModuleCoursePage/ModuleCoursePage.jsx";
+import CourseListForStudents from './course/CourseListForStudents.jsx';
+import CoursePageForStudents from './course/CoursePageForStudents.jsx';
 import './App.css';
 
 
@@ -34,6 +36,9 @@ const App = () => {
                 <Route path="/courses/:courseId/students/attempts" element={<AddAttemptsPage/>}/>
                 <Route path="/courses/:courseId/students/remove" element={<RemoveStudentsPage/>}/>
                 <Route path="/courses/:courseId/students/results" element={<StudentResultsPage />}/>
+
+                <Route path="student/courses" element={<CourseListForStudents />} />
+                <Route path="student/courses/:courseId" element={<CoursePageForStudents />} />
 
                 <Route path="/courses/:courseId/modules" element={<ModuleCourse />} />
                 <Route path="/courses/:courseId/modules/:moduleId" element={<ModuleCoursePage />} />
