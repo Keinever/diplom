@@ -1,10 +1,12 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db import transaction, IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404
 from .models import *
 from .serializers import *
 
@@ -12,10 +14,19 @@ class CoursesViewSet(viewsets.ModelViewSet):
     queryset = Courses.objects.all()
     serializer_class = CoursesSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
 
 class ProgressViewSet(viewsets.ModelViewSet):
     queryset = Progress.objects.all()
     serializer_class = ProgressSerializer
+
+class ModulesViewSet(viewsets.ModelViewSet):
+    queryset = Modules.objects.all()
+    serializer_class = ModuleSerializer
 
 
 class SolutionsViewSet(viewsets.ModelViewSet):
@@ -25,7 +36,7 @@ class SolutionsViewSet(viewsets.ModelViewSet):
 
 class StepsViewSet(viewsets.ModelViewSet):
     queryset = Steps.objects.all()
-    serializer_class = StepsSerializer
+    serializer_class = StepSerializer
 
 
 class StudentsViewSet(viewsets.ModelViewSet):
@@ -102,3 +113,52 @@ def get_csrf(request):
     response = JsonResponse({'detail': 'CSRF cookie set'})
     response['X-CSRFToken'] = get_token(request)
     return response
+
+
+class StudentStepAttemptView(APIView):
+    def get(self, request):
+        student_id = request.query_params.get('student_id')
+        step_id = request.query_params.get('step_id')
+
+        if not student_id or not step_id:
+            return Response(
+                {"error": "Both student_id and step_id are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        attempt = get_object_or_404(
+            StudentStepAttempt,
+            student=student_id,
+            step=step_id
+        )
+
+        serializer = StudentStepAttemptSerializer(attempt)
+        return Response(serializer.data)
+
+    def post(self, request):
+        student_id = request.data.get('student')
+        step_id = request.data.get('step')
+
+        if not student_id or not step_id:
+            return Response(
+                {"error": "Both student and step are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        student = get_object_or_404(StudentProfile, pk=student_id)
+        step = get_object_or_404(Steps, pk=step_id)
+
+        attempt, created = StudentStepAttempt.objects.get_or_create(
+            student=student,
+            step=step,
+            defaults={'attempts': 0}
+        )
+
+        attempt.attempts += 1
+        attempt.save()
+
+        serializer = StudentStepAttemptSerializer(attempt)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
