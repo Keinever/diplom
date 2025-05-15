@@ -68,10 +68,10 @@ class Steps(models.Model):
     step_file = models.FileField(upload_to='files_uploaded', blank=True, null=True,
                     validators=[FileExtensionValidator(allowed_extensions=['MOV','avi','mp4','webm','mkv', 'pdf'])]
                 )
-    attemts = models.ManyToManyField(
+    attempts = models.ManyToManyField(
         'StudentProfile',
         through='StudentStepAttempt',
-        related_name='steps'
+        related_name='step_attempts'
     )
 
     class Meta:
@@ -133,8 +133,8 @@ class Groups(models.Model):
         db_table = 'Groups'
 
 class StudentStepAttempt(models.Model):
-    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
-    step = models.ForeignKey(Steps, on_delete=models.CASCADE)
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="student_attempts")
+    step = models.ForeignKey(Steps, on_delete=models.CASCADE, related_name="step_attempts")
     attempts = models.PositiveIntegerField(default=0)
 
     class Meta:

@@ -8,6 +8,13 @@ class TeachersSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
+class StudentStepAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentStepAttempt
+        fields = ['attempts', 'student', 'step']
+
+
 class StepSerializer(serializers.ModelSerializer):
     step_file = serializers.FileField(
         required=False,
@@ -19,9 +26,14 @@ class StepSerializer(serializers.ModelSerializer):
         model = Steps
         fields = '__all__'
         extra_kwargs = {
-            'module': {'required': False, 'write_only': True},
-            'step_id': {'read_only': True}
+            'module': {'required': False},
         }
+
+    attempts = StudentStepAttemptSerializer(
+        source='step_attempts',
+        many=True,
+        read_only=True
+    )
 
 
 class ModuleSerializer(serializers.ModelSerializer):
@@ -31,7 +43,7 @@ class ModuleSerializer(serializers.ModelSerializer):
         model = Modules
         fields = '__all__'
         extra_kwargs = {
-            'course': {'required': False, 'write_only': True},
+            'course': {'required': False},
             'module_id': {'read_only': True}
         }
 
@@ -62,7 +74,7 @@ class CoursesSerializer(serializers.ModelSerializer):
             module = Modules.objects.create(course=course, **module_data)
 
             for step_data in steps_data:
-                # Обработка файла
+
                 step_file = step_data.pop('step_file', None)
                 step = Steps.objects.create(module=module, **step_data)
                 if step_file:
@@ -74,19 +86,19 @@ class CoursesSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         modules_data = validated_data.pop('modules', [])
 
-        # Обновление основных полей курса
+
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
         instance.save()
 
-        # Удаление старых модулей и связанных файлов
+
         for module in instance.modules.all():
             for step in module.steps.all():
                 if step.step_file:
                     step.step_file.delete()
             module.delete()
 
-        # Создание новых модулей и шагов
+
         for module_data in modules_data:
             steps_data = module_data.pop('steps', [])
             module = Modules.objects.create(course=instance, **module_data)
@@ -113,21 +125,14 @@ class SolutionsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class StepsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Steps
-        fields = '__all__'
-
-
 class StudentsSerializer(serializers.ModelSerializer):
+    attempts = StudentStepAttemptSerializer(
+        source='student_attempts',
+        many=True,
+        read_only=True
+    )
     class Meta:
         model = StudentProfile
-        fields = '__all__'
-
-
-class StudentStepAttempt(serializers.ModelSerializer):
-    class Meta:
-        model = StudentStepAttempt
         fields = '__all__'
 
 

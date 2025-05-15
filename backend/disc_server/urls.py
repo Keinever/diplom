@@ -19,6 +19,7 @@ urlpatterns = [
     path('', RedirectView.as_view(url='/api/', permanent=False)),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path(r'api/attempts', views.StudentStepAttemptView.as_view(), name='student-step-attempt'),
     path('api-auth/register/', views.register, name='register'),
     path('api-auth/login/', views.custom_login, name='login'),
     path('api-auth/logout/', views.custom_logout, name='logout'),
