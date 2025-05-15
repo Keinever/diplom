@@ -12,6 +12,11 @@ class CoursesViewSet(viewsets.ModelViewSet):
     queryset = Courses.objects.all()
     serializer_class = CoursesSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
 
 class ProgressViewSet(viewsets.ModelViewSet):
     queryset = Progress.objects.all()

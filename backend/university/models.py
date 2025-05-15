@@ -1,3 +1,4 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
@@ -64,7 +65,9 @@ class Steps(models.Model):
     module = models.ForeignKey(Modules, models.CASCADE, db_column='module_id', related_name='steps')
     lab_number = models.IntegerField(blank=True, null=True)
     score = models.IntegerField(blank=True, null=True)
-    step_file = models.BinaryField(blank=True, null=True)
+    step_file = models.FileField(upload_to='files_uploaded', blank=True, null=True,
+                    validators=[FileExtensionValidator(allowed_extensions=['MOV','avi','mp4','webm','mkv', 'pdf'])]
+                )
     attemts = models.ManyToManyField(
         'StudentProfile',
         through='StudentStepAttempt',
@@ -100,12 +103,11 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
 class StudentProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='student_profile')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='student_profile', primary_key=True)
     group = models.ForeignKey('Groups', models.SET_NULL, blank=True, null=True)
     isu_id = models.CharField(unique=True, max_length=20, blank=True, null=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    email = models.CharField(unique=True, max_length=255)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     attempts = models.ManyToManyField(
         'Steps',
@@ -118,10 +120,9 @@ class StudentProfile(models.Model):
 
 
 class TeacherProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='teacher_profile')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='teacher_profile', primary_key=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    email = models.CharField(unique=True, max_length=255)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
 
 
