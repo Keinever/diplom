@@ -125,6 +125,13 @@ class StudentsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class StudentStepAttempt(serializers.ModelSerializer):
+    class Meta:
+        model = StudentStepAttempt
+        fields = '__all__'
+
+
+
 class StudentRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

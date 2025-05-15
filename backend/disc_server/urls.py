@@ -13,6 +13,7 @@ router.register(r'solutions', views.SolutionsViewSet)
 router.register(r'steps', views.StepsViewSet)
 router.register(r'students', views.StudentsViewSet)
 router.register(r'teachers', views.TeachersViewSet)
+router.register(r'modules', views.ModulesViewSet)
 
 urlpatterns = [
     path('', RedirectView.as_view(url='/api/', permanent=False)),

@@ -23,6 +23,11 @@ class ProgressViewSet(viewsets.ModelViewSet):
     serializer_class = ProgressSerializer
 
 
+class ModulesViewSet(viewsets.ModelViewSet):
+    queryset = Modules.objects.all()
+    serializer_class = ModuleSerializer
+
+
 class SolutionsViewSet(viewsets.ModelViewSet):
     queryset = Solutions.objects.all()
     serializer_class = SolutionsSerializer
