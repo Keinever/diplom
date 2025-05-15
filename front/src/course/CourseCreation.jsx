@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ModuleCreation from './ModuleCreation.jsx';
+import api, {get_csrf} from "../api.js";
 import './CourseCreation.css';
 
 const CourseCreation = () => {
@@ -22,53 +23,54 @@ const CourseCreation = () => {
     setModules(prev => prev.filter(m => m.id !== id));
   };
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const courseData = { 
-        ...course, 
-        modules: modules.map(module => ({
-          title: module.title,
-          description: module.description,
-          startDate: module.startDate,
-          steps: module.steps.map(step => ({
-            title: step.title,
-            description: step.description,
-            type: step.type,
-            file: step.file ? step.file.JSON : null,
-            assignmentTitle: step.assignmentTitle || null
-          }))
+ const handleSubmit = async () => {
+  try {
+    const csrfToken = get_csrf();
+    const courseData = {
+      title: course.title,
+      description: course.description,
+      teacher: 3, 
+      modules: modules.map(module => ({
+        title: module.title,
+        description: module.description,
+        due_date: module.startDate, 
+        total_points: module.total_points || 100, 
+        attempts_limit: module.attempts_limit || null,
+        steps: module.steps.map(step => ({
+          title: step.title,
+          description: step.description,
+          exercise_type: step.type, 
+          step_file: step.file || null,
+          lab_number: step.assignmentTitle || null,
+          score: step.score || null
         }))
-      };
+      }))
+    };
+    console.log('Course JSON:', JSON.stringify(courseData, null, 2));
 
-      console.log('Course JSON:', JSON.stringify(courseData, null, 2));
+    const response = await api.post('/api/courses/', courseData, {
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json'
+      }
+    });
 
-      // Здесь должна быть реальная отправка на сервер
-      const response = await fetch('https://your-api-endpoint.com/courses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(courseData),
-        
-      });
-      if (!response.ok) throw new Error('Ошибка при создании курса');
+    console.log('Курс успешно создан:', response.data);
+    alert('Курс успешно создан!');
+    
+    setCourse({ title: '', description: '', teacher_id: '' });
+    setModules([]);
+    
+    return response.data;
 
-      const result = await response.json();
-      console.log('Курс успешно создан:', result);
-      alert('Курс успешно создан!');
-      
-      setCourse({ title: '', description: '' });
-      setModules([]);
-    } catch (err) {
-      console.error('Ошибка:', err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error('Ошибка:', err);
+    setError(err.response?.data?.message || 'Ошибка при создании курса');
+    throw err;
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleModuleClick = (module) => {
     setSelectedModule(module);
@@ -189,7 +191,7 @@ const CourseCreation = () => {
                     {step.file && (
                       <p className="step-file">
                         <span className="file-icon">📎</span>
-                        {step.file.name}
+                        {step.fileName}
                       </p>
                     )}
                     {step.assignmentTitle && (

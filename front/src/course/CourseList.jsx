@@ -47,11 +47,11 @@ const CourseList = () => {
   }, []);
 
   const handleEditCourse = (courseId) => {
-    navigate(`/course/edit`); //${courseId}
+    navigate(`/courses/${courseId}/edit`); //${courseId}
   };
 
-  const handleOpenCoursePage = () => {
-    navigate(`/course/page`); 
+  const handleOpenCoursePage = (courseId) => {
+    navigate(`/courses/${courseId}`); 
   };
 
   const handleCreateCourse = () => {
