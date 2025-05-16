@@ -46,15 +46,12 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
   const addStep = () => {
     if (!stepContent.title) return;
 
+    console.log(stepContent.file);
     const newStep = {
       title: stepContent.title,
       description: stepContent.description,
       type: stepType,
-      file: stepContent.file ? { 
-        name: stepContent.file.name,
-        size: stepContent.file.size,
-        type: stepContent.file.type 
-      } : null,
+      file: stepContent.file ? stepContent.file : null,
       assignmentTitle: stepType.includes('задание') ? stepContent.assignmentTitle : null
     };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ModuleCreation from './ModuleCreation.jsx';
 import './CourseCreation.css';
+import api, {get_csrf} from "../api.js";
 
 const CourseCreation = () => {
   const [course, setCourse] = useState({ title: '', description: '' });
@@ -23,51 +24,45 @@ const CourseCreation = () => {
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const courseData = { 
-        ...course, 
-        modules: modules.map(module => ({
-          title: module.title,
-          description: module.description,
-          startDate: module.startDate,
-          steps: module.steps.map(step => ({
-            title: step.title,
-            description: step.description,
-            type: step.type,
-            file: step.file ? step.file.JSON : null,
-            assignmentTitle: step.assignmentTitle || null
-          }))
-        }))
-      };
+    const formData = new FormData();
 
-      console.log('Course JSON:', JSON.stringify(courseData, null, 2));
+    // Основные поля курса
+    formData.append('title', 'asd');
+    formData.append('description', 'asd');
+    console.log(modules[0]);
 
-      // Здесь должна быть реальная отправка на сервер
-      const response = await fetch('https://your-api-endpoint.com/courses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(courseData),
-        
+    modules.forEach((module, moduleIndex) => {
+      // Добавляем поля модуля с правильным синтаксисом
+      formData.append(`modules[${moduleIndex}][title]`, module.title || 'asd');
+      formData.append(`modules[${moduleIndex}][due_date]`, module.due_date || '2024-12-31');
+      formData.append(`modules[${moduleIndex}][total_points]`, module.total_points || 100);
+
+      // Шаги
+      module.steps.forEach((step, stepIndex) => {
+        formData.append(`modules[${moduleIndex}][steps][${stepIndex}][title]`, step.title);
+        formData.append(`modules[${moduleIndex}][steps][${stepIndex}][description]`, step.description);
+        formData.append(`modules[${moduleIndex}][steps][${stepIndex}][exercise_type]`, step.type);
+
+        if (step.file instanceof File) {
+          formData.append(
+              `modules[${moduleIndex}][steps][${stepIndex}][step_file]`,
+              step.file,
+              step.file.name
+          );
+        }
       });
-      if (!response.ok) throw new Error('Ошибка при создании курса');
+    });
 
-      const result = await response.json();
-      console.log('Курс успешно создан:', result);
-      alert('Курс успешно создан!');
-      
-      setCourse({ title: '', description: '' });
-      setModules([]);
-    } catch (err) {
-      console.error('Ошибка:', err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+
+    const csrfToken = get_csrf();
+
+    const res = await api.post('/api/courses/', formData, {
+      headers: {
+        'X-CSRFToken': csrfToken,
+      },
+    });
+
+    console.log(res);
   };
 
   const handleModuleClick = (module) => {
@@ -149,14 +144,7 @@ const CourseCreation = () => {
         <button 
           className="submit-btn"
           onClick={handleSubmit}
-          disabled={isLoading || !course.title || modules.length === 0}
-        >
-          {isLoading ? (
-            <>
-              <span className="spinner"></span>
-              Создание...
-            </>
-          ) : 'Создать курс'}
+        > 'Создать курс'
         </button>
       </div>
 

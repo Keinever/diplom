@@ -1,5 +1,10 @@
+from collections import defaultdict
+
 from rest_framework import serializers
 from .models import *
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
+from django.core.files.base import ContentFile
 
 
 class TeachersSerializer(serializers.ModelSerializer):
@@ -19,6 +24,7 @@ class StepSerializer(serializers.ModelSerializer):
     step_file = serializers.FileField(
         required=False,
         allow_null=True,
+        write_only=True,
         validators=[FileExtensionValidator(allowed_extensions=['mov', 'avi', 'mp4', 'webm', 'mkv', 'pdf'])]
     )
 
@@ -26,8 +32,16 @@ class StepSerializer(serializers.ModelSerializer):
         model = Steps
         fields = '__all__'
         extra_kwargs = {
-            'module': {'required': False},
+            'step_id': {'read_only': True},
+            'module': {'read_only': True}
         }
+
+    def create(self, validated_data):
+        step_file = validated_data.pop('step_file', None)
+        instance = super().create(validated_data)
+        if step_file:
+            instance.step_file.save(step_file.name, step_file)
+        return instance
 
     attempts = StudentStepAttemptSerializer(
         source='step_attempts',
@@ -47,26 +61,75 @@ class ModuleSerializer(serializers.ModelSerializer):
             'module_id': {'read_only': True}
         }
 
+    def to_internal_value(self, data):
+        """
+        Преобразует данные из плоского QueryDict в структурированный формат
+        """
+        result = {}
+
+        def set_nested(target, keys, value):
+            current = target
+            for i, key in enumerate(keys):
+                is_last = i == len(keys) - 1
+                next_key = keys[i+1] if i+1 < len(keys) else None
+
+                # Обработка списков
+                if next_key and next_key.isdigit():
+                    # Создаем список при необходимости
+                    if key not in current:
+                        current[key] = []
+                    container = current[key]
+
+                    index = int(next_key)
+                    # Расширяем список до нужного размера
+                    while len(container) <= index:
+                        container.append({})
+
+                    # Переходим к элементу списка
+                    current = container[index]
+                    i += 1  # Пропускаем обработанный индекс
+                else:
+                    # Обработка словарей
+                    if key not in current:
+                        current[key] = {} if not is_last else value
+                    current = current[key]
+
+            # Устанавливаем значение для последнего ключа
+            if isinstance(current, dict) and not is_last:
+                current[keys[-1]] = value
+
+        for key, value in data.items():
+            if isinstance(value, list):
+                value = value[0]
+
+            path = [p for p in key.replace(']', '').split('[') if p]
+            set_nested(result, path, value)
+        print(result)
+        result["steps"] = [v for step in  result.get("steps", []) for k,v in step.items()]
+        print(result)
+        return super().to_internal_value(result)
+
 
 class CoursesSerializer(serializers.ModelSerializer):
     modules = ModuleSerializer(many=True)
-    teacher = TeachersSerializer(read_only=True)
 
     class Meta:
         model = Courses
         fields = '__all__'
         extra_kwargs = {
-            'course_id': {'read_only': True}
+            'course_id': {'read_only': True},
+            "teacher": {"read_only": True},
+            "students": {"read_only": True},
         }
 
     def create(self, validated_data):
+        modules_data = validated_data.pop('modules')
         user = self.context["request"].user
         try:
             teacher = TeacherProfile.objects.get(user=user)
-        except TeacherProfile.DoesNotExist:
-            raise serializers.ValidationError("User is not a teacher")
+        except ObjectDoesNotExist:
+            raise Http404
 
-        modules_data = validated_data.pop('modules', [])
         course = Courses.objects.create(teacher=teacher, **validated_data)
 
         for module_data in modules_data:
@@ -74,43 +137,16 @@ class CoursesSerializer(serializers.ModelSerializer):
             module = Modules.objects.create(course=course, **module_data)
 
             for step_data in steps_data:
-
                 step_file = step_data.pop('step_file', None)
                 step = Steps.objects.create(module=module, **step_data)
                 if step_file:
-                    step.step_file = step_file
-                    step.save()
+                    step.step_file.save(
+                        step_file.name,
+                        ContentFile(step_file.read()),
+                        save=True
+                    )
 
         return course
-
-    def update(self, instance, validated_data):
-        modules_data = validated_data.pop('modules', [])
-
-
-        instance.title = validated_data.get('title', instance.title)
-        instance.description = validated_data.get('description', instance.description)
-        instance.save()
-
-
-        for module in instance.modules.all():
-            for step in module.steps.all():
-                if step.step_file:
-                    step.step_file.delete()
-            module.delete()
-
-
-        for module_data in modules_data:
-            steps_data = module_data.pop('steps', [])
-            module = Modules.objects.create(course=instance, **module_data)
-
-            for step_data in steps_data:
-                step_file = step_data.pop('step_file', None)
-                step = Steps.objects.create(module=module, **step_data)
-                if step_file:
-                    step.step_file = step_file
-                    step.save()
-
-        return instance
 
 
 class ProgressSerializer(serializers.ModelSerializer):
