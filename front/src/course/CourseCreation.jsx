@@ -3,6 +3,30 @@ import ModuleCreation from './ModuleCreation.jsx';
 import api, {get_csrf} from "../api.js";
 import './CourseCreation.css';
 
+const buildFormData = (formData, data, parentKey = '') => {
+  if (data instanceof File) {
+    formData.append(parentKey, data, data.name);
+  } else if (typeof data === 'object' && data !== null) {
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      const formattedKey = parentKey ? `${parentKey}[${key}]` : key;
+      
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          const arrayKey = `${formattedKey}[${index}]`;
+          buildFormData(formData, item, arrayKey);
+        });
+      } else if (typeof value === 'object' && value !== null) {
+        buildFormData(formData, value, formattedKey);
+      } else {
+        formData.append(formattedKey, value);
+      }
+    });
+  } else {
+    formData.append(parentKey, data);
+  }
+};
+
 const CourseCreation = () => {
   const [course, setCourse] = useState({ title: '', description: '' });
   const [modules, setModules] = useState([]);
@@ -23,54 +47,72 @@ const CourseCreation = () => {
     setModules(prev => prev.filter(m => m.id !== id));
   };
 
- const handleSubmit = async () => {
-  try {
-    const csrfToken = get_csrf();
-    const courseData = {
-      title: course.title,
-      description: course.description,
-      teacher: 3, 
-      modules: modules.map(module => ({
-        title: module.title,
-        description: module.description,
-        due_date: module.startDate, 
-        total_points: module.total_points || 100, 
-        attempts_limit: module.attempts_limit || null,
-        steps: module.steps.map(step => ({
-          title: step.title,
-          description: step.description,
-          exercise_type: step.type, 
-          step_file: step.file || null,
-          lab_number: step.assignmentTitle || null,
-          score: step.score || null
-        }))
-      }))
-    };
-    console.log('Course JSON:', JSON.stringify(courseData, null, 2));
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      const csrfToken = get_csrf();
+      const formData = new FormData();
+      const dataTmp = {"title": course.title, "description": course.description, "modules": modules}
+      const formData1 = new FormData();
+      buildFormData(formData1, dataTmp);
 
-    const response = await api.post('/api/courses/', courseData, {
-      headers: {
-        'X-CSRFToken': csrfToken,
-        'Content-Type': 'application/json'
+      formData.append('title', course.title);
+      formData.append('description', course.description);
+
+      modules.forEach((module, moduleIndex) => {
+        formData.append(`modules[${moduleIndex}]`, JSON.stringify({"title": module.title}));
+        formData.append(`modules[${moduleIndex}][description]`, module.description);
+        formData.append(`modules[${moduleIndex}][due_date]`, module.startDate);
+        formData.append(`modules[${moduleIndex}][total_points]`, module.total_points || 100);
+        formData.append(`modules[${moduleIndex}][attempts_limit]`, module.attempts_limit || null);
+        
+        module.steps.forEach((step, stepIndex) => {
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][title]`, step.title);
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][description]`, step.description);
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][exercise_type]`, step.type);
+          
+          if (step.file instanceof File) {
+            formData.append(
+              `modules[${moduleIndex}][steps][${stepIndex}][step_file]`, 
+              step.file, 
+              step.file.name
+            );
+          }
+          
+          if (step.assignmentTitle) {
+            formData.append(
+              `modules[${moduleIndex}][steps][${stepIndex}][lab_number]`, 
+              step.assignmentTitle
+            );
+          }
+        });
+      });
+      console.log('--- FormData Contents ---');
+      for (let [key, value] of formData1.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}:`, `File(${value.name}, ${value.type}, ${value.size} bytes)`);
+        } else {
+          console.log(`${key}:`, value);
+        }
       }
-    });
+      const response = await api.post('/api/courses/', formData1, {
+        headers: {
+          'X-CSRFToken': csrfToken,
+        }
+      });
 
-    console.log('Курс успешно создан:', response.data);
-    alert('Курс успешно создан!');
-    
-    setCourse({ title: '', description: '', teacher_id: '' });
-    setModules([]);
-    
-    return response.data;
-
-  } catch (err) {
-    console.error('Ошибка:', err);
-    setError(err.response?.data?.message || 'Ошибка при создании курса');
-    throw err;
-  } finally {
-    setIsLoading(false);
-  }
-};
+      console.log('Курс успешно создан:', response.data);
+      alert('Курс успешно создан!');
+      setCourse({ title: '', description: '' });
+      setModules([]);
+      
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setError(err.response?.data?.message || 'Ошибка при создании курса');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleModuleClick = (module) => {
     setSelectedModule(module);
@@ -191,14 +233,14 @@ const CourseCreation = () => {
                     {step.file && (
                       <p className="step-file">
                         <span className="file-icon">📎</span>
-                        {step.fileName}
+                        {step.file.name}
                       </p>
                     )}
                     {step.assignmentTitle && (
                       <p className="step-descripton">
-                      <span className="step-description">📎</span>
-                      {step.assignmentTitle}
-                    </p>
+                        <span className="step-description">📎</span>
+                        {step.assignmentTitle}
+                      </p>
                     )}
                   </div>
                 ))}

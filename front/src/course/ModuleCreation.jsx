@@ -22,15 +22,6 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
   const assignmentOptions = ['Задание 1', 'Задание 2', 'Задание 3'];
   const stepTypes = ['лекция', 'обучающие задание', 'аттестационное задание'];
 
-  const readFileAsBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = error => reject(error);
-      reader.readAsDataURL(file);
-    });
-  };
-
   useEffect(() => {
     if (initialModule) {
       setModule(initialModule);
@@ -52,58 +43,39 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
     setStepContent(prev => ({ ...prev, file: e.target.files[0] }));
   };
 
-  const addStep = async () => {
+  const addStep = () => {
     if (!stepContent.title) return;
 
-    try {
-      let fileBase64 = null;
-      let fileName = null;
+    const newStep = {
+      title: stepContent.title,
+      description: stepContent.description,
+      type: stepType,
+      file: stepContent.file,
+      assignmentTitle: stepType.includes('задание') ? stepContent.assignmentTitle : null
+    };
 
-      if (stepContent.file) {
-        if (stepContent.file instanceof File) {
-          fileBase64 = await readFileAsBase64(stepContent.file);
-          fileName = stepContent.file.name;
-        } else {
-          fileBase64 = stepContent.file;
-          fileName = module.steps[editingStepIndex]?.fileName;
-        }
-      }
-
-      const newStep = {
-        title: stepContent.title,
-        description: stepContent.description,
-        type: stepType,
-        file: fileBase64,
-        fileName: fileName,
-        assignmentTitle: stepType.includes('задание') ? stepContent.assignmentTitle : null
-      };
-
-      if (editingStepIndex !== null) {
-        setModule(prev => ({
-          ...prev,
-          steps: prev.steps.map((step, index) => 
-            index === editingStepIndex ? newStep : step
-          )
-        }));
-      } else {
-        setModule(prev => ({
-          ...prev,
-          steps: [...prev.steps, newStep]
-        }));
-      }
-
-      setStepContent({ 
-        title: '', 
-        description: '', 
-        file: null,
-        assignmentTitle: ''
-      });
-      setShowStepForm(false);
-      setEditingStepIndex(null);
-    } catch (error) {
-      console.error('Ошибка при загрузке файла:', error);
-      alert('Ошибка при загрузке файла!');
+    if (editingStepIndex !== null) {
+      setModule(prev => ({
+        ...prev,
+        steps: prev.steps.map((step, index) => 
+          index === editingStepIndex ? newStep : step
+        )
+      }));
+    } else {
+      setModule(prev => ({
+        ...prev,
+        steps: [...prev.steps, newStep]
+      }));
     }
+
+    setStepContent({ 
+      title: '', 
+      description: '', 
+      file: null,
+      assignmentTitle: ''
+    });
+    setShowStepForm(false);
+    setEditingStepIndex(null);
   };
 
   const editStep = (index) => {
@@ -111,7 +83,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
     setStepContent({
       title: step.title,
       description: step.description,
-      file: null, 
+      file: step.file,
       assignmentTitle: step.assignmentTitle || ''
     });
     setStepType(step.type);
@@ -129,7 +101,6 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!module.title || !module.startDate) return;
-    
     addModule(module);
     
     if (!isEditing) {
@@ -219,7 +190,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
                       {step.file && (
                         <p className="step-file">
                           <span className="file-icon">📎</span>
-                          {step.fileName}
+                          {step.file.name}
                         </p>
                       )}
                     </div>
@@ -289,6 +260,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
                     required
                   />
                 </div>
+
                 <div className="form-group">
                   <label>Описание шага*</label>
                   <input
@@ -301,31 +273,30 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
                   />
                 </div>
 
-            {stepType === 'лекция' && (
-              <>
-                <div className="form-group">
-                  <label>
-                    {editingStepIndex !== null ? 'Заменить файл' : 'Прикрепить файл'}
-                  </label>
-                  <div className="file-upload">
-                    <label className="upload-btn">
-                      Выберите файл
-                      <input
-                        type="file"
-                        onChange={handleFileChange}
-                        accept=".pdf,.doc,.docx,.pptx,.mp4"
-                        hidden
-                      />
+                {stepType === 'лекция' && (
+                  <div className="form-group">
+                    <label>
+                      {editingStepIndex !== null ? 'Заменить файл' : 'Прикрепить файл'}
                     </label>
-                    {stepContent.file && editingStepIndex === null && (
-                      <span className="file-name">
-                        {stepContent.file.name}
-                      </span>
-                    )}
+                    <div className="file-upload">
+                      <label className="upload-btn">
+                        Выберите файл
+                        <input
+                          type="file"
+                          onChange={handleFileChange}
+                          accept=".MOV,.avi,.mp4,.webm,.mkv,.pdf"
+                          hidden
+                        />
+                      </label>
+                      {stepContent.file && (
+                        <span className="file-name">
+                          {stepContent.file.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                )}
+
                 {(stepType === 'обучающие задание' || stepType === 'аттестационное задание') && (
                   <div className="form-group">
                     <label>Выберите задание</label>

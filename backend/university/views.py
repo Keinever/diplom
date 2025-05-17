@@ -1,7 +1,10 @@
+import json
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from django.db import transaction, IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
@@ -13,11 +16,12 @@ from .serializers import *
 class CoursesViewSet(viewsets.ModelViewSet):
     queryset = Courses.objects.all()
     serializer_class = CoursesSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["request"] = self.request
-        return context
+    def create(self, request, *args, **kwargs):
+        # Для отладки
+        print("Raw request data:", request.data)
+        return super().create(request, *args, **kwargs)
 
 
 class ProgressViewSet(viewsets.ModelViewSet):
@@ -37,6 +41,7 @@ class SolutionsViewSet(viewsets.ModelViewSet):
 class StepsViewSet(viewsets.ModelViewSet):
     queryset = Steps.objects.all()
     serializer_class = StepSerializer
+    parser_classes = [MultiPartParser, JSONParser]
 
 
 class StudentsViewSet(viewsets.ModelViewSet):
@@ -53,7 +58,7 @@ class TeachersViewSet(viewsets.ModelViewSet):
 @transaction.atomic
 def register(request):
     try:
-        with transaction.atomic():  # Контекстный менеджер для части кода
+        with transaction.atomic():
             serializer = StudentRegistrationSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
@@ -61,13 +66,10 @@ def register(request):
                 email=serializer.validated_data['email'],
                 password=serializer.validated_data['password'],
                 role='student',
-                first_name=serializer.validated_data['first_name'],
-                last_name=serializer.validated_data['last_name']
             )
 
             StudentProfile.objects.create(
                 user=user,
-                email=serializer.validated_data['email'],
                 first_name=serializer.validated_data['first_name'],
                 last_name=serializer.validated_data['last_name'],
             )
@@ -77,6 +79,7 @@ def register(request):
     except IntegrityError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        print(e)
         return Response({'error': 'Registration failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
