@@ -41,7 +41,7 @@ const TeacherPersonalAccount = () => {
                 <div>
                     <button 
                       className="buttonForCourse button-my-courses"
-                      onClick={() => navigate('/course/list')}
+                      onClick={() => navigate('/teacher/courses')}
                     >
                       <span className="icon">📜</span>
                       <span className='text'>Мои курсы</span>

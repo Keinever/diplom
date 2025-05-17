@@ -45,7 +45,7 @@ class Progress(models.Model):
 
 class Solutions(models.Model):
     solution_id = models.AutoField(primary_key=True)
-    student = models.ForeignKey('StudentProfile', models.DO_NOTHING)
+    student = models.ForeignKey('StudentProfile', models.CASCADE)
     lab = models.ForeignKey(Modules, models.DO_NOTHING)
     solution_data = models.TextField(blank=True, null=True)
     grade = models.IntegerField(blank=True, null=True)
@@ -63,7 +63,7 @@ class Steps(models.Model):
     description = models.TextField()
     exercise_type = models.CharField(max_length=50)
     module = models.ForeignKey(Modules, models.CASCADE, db_column='module_id', related_name='steps')
-    lab_number = models.IntegerField(blank=True, null=True)
+    lab_number = models.CharField(max_length=50, blank=True, null=True)
     score = models.IntegerField(blank=True, null=True)
     step_file = models.FileField(upload_to='files_uploaded', blank=True, null=True,
                     validators=[FileExtensionValidator(allowed_extensions=['MOV','avi','mp4','webm','mkv', 'pdf'])]

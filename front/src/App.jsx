@@ -45,6 +45,7 @@ const App = () => {
 
                 <Route path="/students" element={<StudentList />}/>
                 <Route path="/teacher/profile" element={<TeacherPersonalAccount />}/>
+                <Route path="/teacher/courses" element={<CourseList />}/>
                 <Route path="*" element={<Navigate to="/course/students/add" replace />} />
             </Routes>
         </BrowserRouter>

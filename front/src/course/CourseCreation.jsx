@@ -1,7 +1,31 @@
 import React, { useState } from 'react';
 import ModuleCreation from './ModuleCreation.jsx';
-import './CourseCreation.css';
 import api, {get_csrf} from "../api.js";
+import './CourseCreation.css';
+
+const buildFormData = (formData, data, parentKey = '') => {
+  if (data instanceof File) {
+    formData.append(parentKey, data, data.name);
+  } else if (typeof data === 'object' && data !== null) {
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      const formattedKey = parentKey ? `${parentKey}[${key}]` : key;
+      
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          const arrayKey = `${formattedKey}[${index}]`;
+          buildFormData(formData, item, arrayKey);
+        });
+      } else if (typeof value === 'object' && value !== null) {
+        buildFormData(formData, value, formattedKey);
+      } else {
+        formData.append(formattedKey, value);
+      }
+    });
+  } else {
+    formData.append(parentKey, data);
+  }
+};
 
 const CourseCreation = () => {
   const [course, setCourse] = useState({ title: '', description: '' });
@@ -24,45 +48,70 @@ const CourseCreation = () => {
   };
 
   const handleSubmit = async () => {
-    const formData = new FormData();
+    try {
+      setIsLoading(true);
+      const csrfToken = get_csrf();
+      const formData = new FormData();
+      const dataTmp = {"title": course.title, "description": course.description, "modules": modules}
+      const formData1 = new FormData();
+      buildFormData(formData1, dataTmp);
 
-    // Основные поля курса
-    formData.append('title', 'asd');
-    formData.append('description', 'asd');
-    console.log(modules[0]);
+      formData.append('title', course.title);
+      formData.append('description', course.description);
 
-    modules.forEach((module, moduleIndex) => {
-      // Добавляем поля модуля с правильным синтаксисом
-      formData.append(`modules[${moduleIndex}][title]`, module.title || 'asd');
-      formData.append(`modules[${moduleIndex}][due_date]`, module.due_date || '2024-12-31');
-      formData.append(`modules[${moduleIndex}][total_points]`, module.total_points || 100);
-
-      // Шаги
-      module.steps.forEach((step, stepIndex) => {
-        formData.append(`modules[${moduleIndex}][steps][${stepIndex}][title]`, step.title);
-        formData.append(`modules[${moduleIndex}][steps][${stepIndex}][description]`, step.description);
-        formData.append(`modules[${moduleIndex}][steps][${stepIndex}][exercise_type]`, step.type);
-
-        if (step.file instanceof File) {
-          formData.append(
-              `modules[${moduleIndex}][steps][${stepIndex}][step_file]`,
-              step.file,
+      modules.forEach((module, moduleIndex) => {
+        formData.append(`modules[${moduleIndex}]`, JSON.stringify({"title": module.title}));
+        formData.append(`modules[${moduleIndex}][description]`, module.description);
+        formData.append(`modules[${moduleIndex}][due_date]`, module.startDate);
+        formData.append(`modules[${moduleIndex}][total_points]`, module.total_points || 100);
+        formData.append(`modules[${moduleIndex}][attempts_limit]`, module.attempts_limit || null);
+        
+        module.steps.forEach((step, stepIndex) => {
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][title]`, step.title);
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][description]`, step.description);
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][exercise_type]`, step.type);
+          
+          if (step.file instanceof File) {
+            formData.append(
+              `modules[${moduleIndex}][steps][${stepIndex}][step_file]`, 
+              step.file, 
               step.file.name
-          );
+            );
+          }
+          
+          if (step.assignmentTitle) {
+            formData.append(
+              `modules[${moduleIndex}][steps][${stepIndex}][lab_number]`, 
+              step.assignmentTitle
+            );
+          }
+        });
+      });
+      console.log('--- FormData Contents ---');
+      for (let [key, value] of formData1.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}:`, `File(${value.name}, ${value.type}, ${value.size} bytes)`);
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
+      const response = await api.post('/api/courses/', formData1, {
+        headers: {
+          'X-CSRFToken': csrfToken,
         }
       });
-    });
 
-
-    const csrfToken = get_csrf();
-
-    const res = await api.post('/api/courses/', formData, {
-      headers: {
-        'X-CSRFToken': csrfToken,
-      },
-    });
-
-    console.log(res);
+      console.log('Курс успешно создан:', response.data);
+      alert('Курс успешно создан!');
+      setCourse({ title: '', description: '' });
+      setModules([]);
+      
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setError(err.response?.data?.message || 'Ошибка при создании курса');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleModuleClick = (module) => {
@@ -144,7 +193,14 @@ const CourseCreation = () => {
         <button 
           className="submit-btn"
           onClick={handleSubmit}
-        > 'Создать курс'
+          disabled={isLoading || !course.title || modules.length === 0}
+        >
+          {isLoading ? (
+            <>
+              <span className="spinner"></span>
+              Создание...
+            </>
+          ) : 'Создать курс'}
         </button>
       </div>
 
@@ -182,9 +238,9 @@ const CourseCreation = () => {
                     )}
                     {step.assignmentTitle && (
                       <p className="step-descripton">
-                      <span className="step-description">📎</span>
-                      {step.assignmentTitle}
-                    </p>
+                        <span className="step-description">📎</span>
+                        {step.assignmentTitle}
+                      </p>
                     )}
                   </div>
                 ))}
