@@ -1,82 +1,117 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './CoursePageForStudents.css';
-
-// Хардкодные данные для примера
-const SINGLE_COURSE_DATA = {
-  "id": 1,
-  "title": "Дискретная математика",
-  "description": "Основы дискретной математики для программистов",
-  "modules": [
-    {
-      "id": 1,
-      "title": "Основы теории множеств",
-      "description": "Изучение базовых понятий теории множеств",
-      "steps": [
-        {
-          "id": 1,
-          "title": "Введение в множества",
-          "type": "теория",
-          "content": "Основные определения и примеры..."
-        }
-      ]
-    }
-  ]
-};
+import api, { get_csrf } from '../api';
 
 const CoursePageForStudents = () => {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchCourseData = async () => {
       try {
-        // Вариант с API (раскомментировать для использования):
-        // const response = await fetch(`/api/courses/${courseId}`);
-        // const data = await response.json();
+        setIsLoading(true);
+        const csrfToken = get_csrf();
         
-        // Хардкодный вариант:
-        const data = SINGLE_COURSE_DATA;
-        
-        setCourse(data);
-      } catch (error) {
-        console.error('Ошибка загрузки курса:', error);
+        const response = await api.get(`/api/courses/${courseId}/`, {
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const serverData = response.data;
+        const transformedData = {
+          id: serverData.course_id,
+          title: serverData.title,
+          description: serverData.description,
+          modules: serverData.modules.map(module => ({
+            id: module.module_id,
+            title: module.title,
+            description: module.description,
+            steps: module.steps.map(step => ({
+              id: step.step_id,
+              title: step.title,
+              type: step.exercise_type,
+              content: step.description
+            }))
+          }))
+        };
+
+        setCourse(transformedData);
+      } catch (err) {
+        console.error('Ошибка загрузки курса:', err);
+        setError('Не удалось загрузить информацию о курсе');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchCourse();
+    fetchCourseData();
   }, [courseId]);
 
   const handleOpenModule = (moduleId) => {
-    navigate(`/courses/${courseId}/modules/${moduleId}`);
+    navigate(`/student/courses/${courseId}/modules/${moduleId}`);
   };
 
-  if (loading) return <div className="loading-text">Загрузка курса...</div>;
-  if (!course) return <div className="error-text">Курс не найден</div>;
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Загрузка информации о курсе...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <h2>Ошибка</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Попробовать снова</button>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return <div className="error-container">Курс не найден</div>;
+  }
 
   return (
     <div className="course-page-container">
-      <h1 className="course-title">{course.title}</h1>
-      <p className="course-description">{course.description}</p>
-      
-      <div className="modules-list">
-        {course.modules.map(module => (
-          <div 
-            key={module.id} 
-            className="module-card"
-            onClick={() => handleOpenModule(module.id)}
-          >
-            <h3 className="module-title">{module.title}</h3>
-            <p className="module-description">{module.description}</p>
-            <div className="module-meta">
-              <span>Шагов: {module.steps.length}</span>
+      <div className="course-header-section">
+        <h2 className="section-title">Название курса</h2>
+        <h1 className="course-title">{course.title}</h1>
+      </div>
+
+      <div className="course-description-section">
+        <h2 className="section-title">Описание курса</h2>
+        <p className="course-description">{course.description}</p>
+      </div>
+
+      <div className="modules-section">
+        <h2 className="section-title">Список модулей</h2>
+        <div className="modules-list">
+          {course.modules.map((module, index) => (
+            <div 
+              key={module.id} 
+              className="module-card"
+              onClick={() => handleOpenModule(module.id)}
+            >
+              <div className="module-header">
+                <h3 className="module-number">Модуль {index + 1}</h3>
+                <h4 className="module-title">{module.title}</h4>
+              </div>
+              <p className="module-description">{module.description}</p>
+              <div className="module-meta">
+                <span>Количество шагов: {module.steps.length}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

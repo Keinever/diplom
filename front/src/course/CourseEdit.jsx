@@ -1,76 +1,65 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import ModuleCreation from './ModuleCreation.jsx';
 import './CourseEdit.css';
+import api, { get_csrf } from '../api';
 
-const COURSE_DATA = {
-    "title": "adads",
-    "description": "adasd",
-    "modules": [
-      {
-        "title": "adad",
-        "description": "adasd",
-        "startDate": "2025-04-03",
-        "steps": [
-          {
-            "title": "OOO",
-            "description": "asd",
-            "type": "обучающие задание",
-            "file": null,
-            "assignmentTitle": "Задание 1"
-          },
-          {
-            "title": "OOO",
-            "description": "asdsad",
-            "type": "лекция",
-            "assignmentTitle": null
-          }
-        ]
-      }
-    ]
-  };
-
-const CourseEdit = ({ courseId }) => {
-  const [course, setCourse] = useState({ 
-    title: '', 
-    description: '', 
-    modules: [] 
+const CourseEdit = () => {
+  const { courseId } = useParams();
+  const [course, setCourse] = useState({
+    title: '',
+    description: '',
+    modules: []
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedModule, setSelectedModule] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  /* Получение данных курса
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`https://your-api-endpoint.com/courses/${courseId}`);
-        if (!response.ok) throw new Error('Ошибка при загрузке курса');
+        const csrfToken = get_csrf();
         
-        const data = await response.json();
-        setCourse(data);
+        const response = await api.get(`/api/courses/${courseId}/`, {
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const serverData = response.data;
+        const transformedModules = serverData.modules.map(module => ({
+          id: module.module_id,
+          title: module.title,
+          description: module.description,
+          startDate: module.due_date ? new Date(module.due_date).toISOString().split('T')[0] : '',
+          steps: module.steps.map(step => ({
+            id: step.step_id,
+            title: step.title,
+            description: step.description,
+            type: step.exercise_type,
+            assignmentTitle: step.lab_number,
+            file: null
+          }))
+        }));
+
+        setCourse({
+          title: serverData.title,
+          description: serverData.description,
+          modules: transformedModules
+        });
+
       } catch (err) {
-        console.error('Ошибка:', err);
-        setError(err.message);
+        console.error('Ошибка загрузки курса:', err);
+        setError('Не удалось загрузить данные курса');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCourse();
-  }, [courseId]);
- */
-useEffect(() => {
-    try {
-      setIsLoading(true);
-      setCourse(COURSE_DATA);
-    } catch (err) {
-      console.error('Ошибка:', err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
   }, [courseId]);
 
   const handleCourseChange = (e) => {
@@ -107,23 +96,37 @@ useEffect(() => {
     setError(null);
     
     try {
-      // Здесь должна быть реальная отправка на сервер
-      const response = await fetch(`https://your-api-endpoint.com/courses/${courseId}`, {
-        method: 'PUT',
+      const csrfToken = get_csrf();
+      const serverFormatData = {
+        title: course.title,
+        description: course.description,
+        modules: course.modules.map(module => ({
+          module_id: module.id,
+          title: module.title,
+          description: module.description,
+          due_date: module.startDate ? `${module.startDate}T00:00:00Z` : null,
+          steps: module.steps.map(step => ({
+            step_id: step.id,
+            title: step.title,
+            description: step.description,
+            exercise_type: step.type,
+            lab_number: step.assignmentTitle
+          }))
+        }))
+      };
+
+      const response = await api.put(`/api/courses/${courseId}/`, serverFormatData, {
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(course),
+          'X-CSRFToken': csrfToken,
+          'Content-Type': 'application/json'
+        }
       });
-      
-      if (!response.ok) throw new Error('Ошибка при сохранении курса');
-      
-      const result = await response.json();
-      console.log('Курс успешно обновлен:', result);
+
+      console.log('Курс успешно обновлен:', response.data);
       alert('Изменения успешно сохранены!');
     } catch (err) {
       console.error('Ошибка:', err);
-      setError(err.message);
+      setError(err.response?.data?.message || 'Ошибка при сохранении курса');
     } finally {
       setIsSaving(false);
     }
@@ -159,7 +162,7 @@ useEffect(() => {
   return (
     <div className="course-edit-container">
       <header className="course-header">
-        <h1>Редактирование курса</h1>
+        <h1>Редактирование курса: {course.title}</h1>
         {error && <div className="error-message">{error}</div>}
       </header>
 
