@@ -64,7 +64,7 @@ const CourseCreation = () => {
       });
 
       if (response.status >= 200 && response.status < 300) {
-        navigate('/courses');
+        navigate('/teacher/courses');
       } else {
         throw new Error('Ошибка при создании курса');
       }

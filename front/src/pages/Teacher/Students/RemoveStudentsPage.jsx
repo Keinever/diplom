@@ -1,5 +1,7 @@
 import React from 'react';
-import StudentList from './StudentList.jsx';
+import StudentList from '../../../students/StudentList.jsx';
+import ProfessorNavBar from "../../../components/NavBar/ProfessorNavBar.jsx";
+import CoursePage from "../../../course/CoursePage.jsx";
 
 const RemoveStudentsPage = () => {
   // Здесь будет запрос к API для получения списка учеников на курсе
@@ -20,12 +22,15 @@ const RemoveStudentsPage = () => {
   };
 
   return (
-    <StudentList
-      title="Удаление учеников с курса"
-      actionText="Удалить"
-      onAction={handleRemoveStudent}
-      emptyMessage="На этом курсе пока нет учеников."
-    />
+      <div className="flex relative">
+        <ProfessorNavBar activeTab="courses" />
+        <StudentList
+            title="Удаление учеников с курса"
+            actionText="Удалить"
+            onAction={handleRemoveStudent}
+            emptyMessage="На этом курсе пока нет учеников."
+        />
+      </div>
   );
 };
 

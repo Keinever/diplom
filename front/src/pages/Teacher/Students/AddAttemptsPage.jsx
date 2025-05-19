@@ -1,5 +1,7 @@
 import React from 'react';
-import StudentList from './StudentList.jsx';
+import StudentList from '../../../students/StudentList.jsx';
+import ProfessorNavBar from "../../../components/NavBar/ProfessorNavBar.jsx";
+import CoursePage from "../../../course/CoursePage.jsx";
 
 const AddAttemptsPage = () => {
   // const fetchStudents = async () => {
@@ -18,13 +20,16 @@ const AddAttemptsPage = () => {
   };
 
   return (
-    <StudentList
-      title="Добавление попыток ученикам"
-      actionText="Добавить попытку"
-      onAction={handleAddAttempt}
-      showAttempts={true}
-      emptyMessage="На этом курсе пока нет учеников."
-    />
+      <div className="flex relative">
+        <ProfessorNavBar activeTab="courses" />
+        <StudentList
+            title="Добавление попыток ученикам"
+            actionText="Добавить попытку"
+            onAction={handleAddAttempt}
+            showAttempts={true}
+            emptyMessage="На этом курсе пока нет учеников."
+        />
+      </div>
   );
 };
 
