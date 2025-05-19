@@ -165,3 +165,52 @@ class StudentStepAttemptView(APIView):
             serializer.data,
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
         )
+
+
+class StudentCourseView(APIView):
+    parser_classes = [JSONParser]
+    def post(self, request):
+        student_id = request.data.get('student_id')
+        course_id = request.data.get('course_id')
+
+        if not student_id or not course_id:
+            return Response(
+                {"error": "Both student_id and course_id are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        student = get_object_or_404(StudentProfile, pk=student_id)
+        course = get_object_or_404(Courses, pk=course_id)
+
+        course_st, created = StudentCourse.objects.get_or_create(
+            student=student,
+            course=course,
+        )
+
+        serializer = StudentCourseSerializer(course_st)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+
+    def delete(self, request):
+        student_id = request.query_params.get('student_id')
+        course_id = request.query_params.get('course_id')
+
+        if not student_id or not course_id:
+            return Response(
+                {"error": "Both student_id and course_id are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        student = get_object_or_404(StudentProfile, pk=student_id)
+        course = get_object_or_404(Courses, pk=course_id)
+
+        course_st = get_object_or_404(
+            StudentCourse,
+            student=student,
+            course=course,
+        )
+        course_st.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+

@@ -20,6 +20,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path(r'api/attempts', views.StudentStepAttemptView.as_view(), name='student-step-attempt'),
+    path(r'api/course_students', views.StudentCourseView.as_view(), name='student-course'),
     path('api-auth/register/', views.register, name='register'),
     path('api-auth/login/', views.custom_login, name='login'),
     path('api-auth/logout/', views.custom_logout, name='logout'),
