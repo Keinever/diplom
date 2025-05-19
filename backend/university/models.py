@@ -10,7 +10,8 @@ class Courses(models.Model):
     teacher = models.ForeignKey('TeacherProfile', models.DO_NOTHING)
     students = models.ManyToManyField(
         'StudentProfile',
-        related_name='courses',
+        through='StudentCourse',
+        related_name='courses_student',
         blank=True,
         verbose_name='Студенты курса'
     )
@@ -114,6 +115,13 @@ class StudentProfile(models.Model):
         through='StudentStepAttempt',
         related_name='student_attempts'
     )
+    courses = models.ManyToManyField(
+        'Courses',
+        through='StudentCourse',
+        related_name='students_courses',
+        blank=True,
+        verbose_name='Студенты курса'
+    )
 
     def __str__(self):
         return f"{str(self.first_name).capitalize()} {str(self.last_name).capitalize()}"
@@ -139,3 +147,10 @@ class StudentStepAttempt(models.Model):
 
     class Meta:
         unique_together = [['student', 'step']]
+
+class StudentCourse(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="students_courses")
+    course = models.ForeignKey(Courses, on_delete=models.CASCADE, related_name="courses_student")
+
+    class Meta:
+        unique_together = [['student', 'course']]

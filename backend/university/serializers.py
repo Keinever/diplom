@@ -20,6 +20,12 @@ class StudentStepAttemptSerializer(serializers.ModelSerializer):
         fields = ['attempts', 'student', 'step']
 
 
+class StudentCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentCourse
+        fields = ['course', 'student']
+
+
 class StepSerializer(serializers.ModelSerializer):
     step_file = serializers.FileField(
         required=False,
@@ -147,6 +153,53 @@ class CoursesSerializer(serializers.ModelSerializer):
                     )
 
         return course
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+
+        if 'modules' in validated_data:
+            modules_data = validated_data.pop('modules')
+            for module_data in modules_data:
+                steps_data = module_data.pop('steps', [])
+                module_id = module_data.get('module_id', None)
+
+                if module_id:
+                    try:
+                        module = Modules.objects.get(module_id=module_id, course=instance)
+                    except Modules.DoesNotExist:
+                        module = None
+
+                    if module:
+                        module_serializer = ModuleSerializer(module, data=module_data, partial=True)
+                        module_serializer.is_valid(raise_exception=True)
+                        module = module_serializer.save()
+                    else:
+                        module_data.pop('module_id', None)
+                        module = Modules.objects.create(course=instance, **module_data)
+                else:
+                    module = Modules.objects.create(course=instance, **module_data)
+
+                for step_data in steps_data:
+                    step_id = step_data.get('step_id', None)
+                    if step_id:
+                        try:
+                            step = Steps.objects.get(step_id=step_id, module=module)
+                        except Steps.DoesNotExist:
+                            step = None
+
+                        if step:
+                            step_serializer = StepSerializer(step, data=step_data, partial=True)
+                            step_serializer.is_valid(raise_exception=True)
+                            step_serializer.save()
+                        else:
+                            step_data.pop('step_id', None)
+                            Steps.objects.create(module=module, **step_data)
+                    else:
+                        Steps.objects.create(module=module, **step_data)
+
+        return instance
 
 
 class ProgressSerializer(serializers.ModelSerializer):
