@@ -1,5 +1,7 @@
 import React from 'react';
-import StudentList from './StudentList.jsx';
+import StudentList from '../../../students/StudentList.jsx';
+import ProfessorNavBar from "../../../components/NavBar/ProfessorNavBar.jsx";
+import CoursePage from "../../../course/CoursePage.jsx";
 
 const AddStudentsPage = () => {
   // Здесь будет запрос к API для получения всех учеников преподавателя
@@ -20,12 +22,15 @@ const AddStudentsPage = () => {
   };
 
   return (
-    <StudentList
-      title="Добавление учеников на курс"
-      actionText="Добавить"
-      onAction={handleAddStudent}
-      emptyMessage="У вас нет учеников, которых можно добавить на этот курс."
-    />
+      <div className="flex relative">
+        <ProfessorNavBar activeTab="courses" />
+        <StudentList
+            title="Добавление учеников на курс"
+            actionText="Добавить"
+            onAction={handleAddStudent}
+            emptyMessage="У вас нет учеников, которых можно добавить на этот курс."
+        />
+      </div>
   );
 };
 

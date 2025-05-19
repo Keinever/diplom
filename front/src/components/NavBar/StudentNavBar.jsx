@@ -1,12 +1,21 @@
-import { BookOpen } from "lucide-react"
+import { BookOpen, BookmarkCheck, FlaskConical } from "lucide-react"
 import NavBar, {NavBarRow} from "./NavBar.jsx";
-import ProfessorNavBar from "./ProfessorNavBar.jsx";
 
-export default function StudentNavBar() {
+export default function StudentNavBar({activeTab}) {
     return (
         <NavBar>
-            <NavBarRow icon={<BookOpen size="20" />} text="Courses"/>
-            <NavBarRow icon={<BookOpen size="20" />} text="Coses"/>
+            <NavBarRow
+                icon={<BookOpen size="25" />}
+                text="Курсы"
+                active={activeTab === 'courses'}
+                path="/student/courses"
+            />
+            <NavBarRow
+                icon={<BookmarkCheck size="25" />}
+                text="Успеваемость"
+                active={activeTab === 'marks'}
+                path="/student/courses/1"
+            />
         </NavBar>
     )
 }

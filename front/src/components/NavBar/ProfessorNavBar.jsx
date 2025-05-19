@@ -7,14 +7,14 @@ export default function ProfessorNavBar({activeTab}) {
             <NavBarRow
                 icon={<BookOpen size="25" />}
                 text="Курсы"
-                color="grey"
                 active={activeTab === 'courses'}
+                path="/teacher/courses"
             />
             <NavBarRow
                 icon={<BookmarkCheck size="25" />}
                 text="Успеваемость"
-                color="grey"
                 active={activeTab === 'marks'}
+                path="/courses/1/edit"
             />
         </NavBar>
     )

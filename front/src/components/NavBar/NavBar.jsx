@@ -1,5 +1,6 @@
 import { ChevronLast, ChevronFirst } from "lucide-react"
 import {useState, createContext, useContext} from 'react';
+import { useNavigate } from 'react-router-dom';
 import ITMOLogo from '../../assets/icons/mini-logo.jpg'
 import ITMOFullLogo from '../../assets/icons/big-logo.jpg'
 
@@ -33,7 +34,13 @@ export default function NavBar({ children }) {
     )
 }
 
-export function NavBarRow({ icon, text, active }) {
+export function NavBarRow({ icon, text, active, path }) {
+    const navigate = useNavigate();
+
+    function handleClick() {
+        console.log(path);
+        navigate(path);
+    }
     const { collapsed } = useContext(NavBarContext)
 
     return (
@@ -46,7 +53,7 @@ export function NavBarRow({ icon, text, active }) {
                 ? "bg-gradient-to-tr from-indigo-100 to-blue-300 text-blue-700"
                 : "hover:bg-indigo-50 hover:text-blue-700"
         }
-        `}>
+        `} onClick={handleClick}>
                 {icon}
             <span
                 className={`overflow-hidden transition-all ${
