@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CourseList.css';
-
-const COURSE_DATA = {
-  "courses": [
-    {
-      "id": 1,
-      "title": "Дискретная математика",
-      "description": "Основы дискретной математики для программистов",
-      "studentCount": 25,
-      "lastUpdated": "2025-03-15"
-    },
-    {
-      "id": 2,
-      "title": "Основы программирования",
-      "description": "Введение в алгоритмы и структуры данных",
-      "studentCount": 30,
-      "lastUpdated": "2025-02-20"
-    }
-  ]
-};
+import api, {get_csrf} from "../api.js";
 
 const CourseList = () => {
   const [courses, setCourses] = useState([]);
@@ -29,25 +11,34 @@ const CourseList = () => {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      try {
-        setIsLoading(true);
-        // const response = await fetch('/api/teacher/courses');
-        // const data = await response.json();
-        
-        setCourses(COURSE_DATA.courses);
-      } catch (err) {
-        console.error('Ошибка загрузки курсов:', err);
-        setError('Не удалось загрузить список курсов');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        try {
+    const csrfToken = get_csrf();
 
+    const response = await api.get('/api/courses/', {
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json'
+      }
+    });
+
+     console.log('Ответ от сервера:', response.data);
+    setCourses(response.data.results);
+    
+    return response.data;
+
+  } catch (err) {
+    console.error('Ошибка загрузки курсов:', err);
+    setError('Не удалось загрузить список курсов');
+    throw err;
+  } finally {
+    setIsLoading(false);
+  }
+};
     fetchCourses();
   }, []);
 
   const handleEditCourse = (courseId) => {
-    navigate(`/courses/${courseId}/edit`); //${courseId}
+    navigate(`/courses/${courseId}/edit`);
   };
 
   const handleOpenCoursePage = (courseId) => {
@@ -55,12 +46,18 @@ const CourseList = () => {
   };
 
   const handleCreateCourse = () => {
-    navigate('/course/create');
+    navigate('/courses/create');
   };
   const handleDelete = async (id) => {
     try {
-        await fetch(`/api/course/delete/${id}`, { method: 'DELETE' });
-        setCourses(courses.filter(course => course.id !== id));
+        const csrfToken = get_csrf();
+        await api.delete(`/api/courses/${id}/`, {
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          }
+        });
+        setCourses(courses.filter(course => course.course_id !== id));
     } catch (error) {
         console.error('Ошибка при удалении ученика:', error);
     }
@@ -99,31 +96,30 @@ const CourseList = () => {
 
       <div className="courses-grid">
         {courses.map(course => (
-          <div key={course.id} className="course-card">
+          <div key={course.course_id} className="course-card">
             <div className="course-info">
               <h2>{course.title}</h2>
               <p className="course-description">{course.description}</p>
               <div className="course-meta">
-                <span>Студентов: {course.studentCount}</span>
-                <span>Обновлен: {course.lastUpdated}</span>
+                <span>Студентов: {course.students.lenght}</span>
               </div>
             </div>
             <div className="course-actions">
               <button 
                 className="edit-btn"
-                onClick={() => handleEditCourse(course.id)}
+                onClick={() => handleEditCourse(course.course_id)}
               >
-                Редактировать
+                изменить
               </button>
               <button 
                 className="view-btn"
-                onClick={() => handleOpenCoursePage(course.id)}
+                onClick={() => handleOpenCoursePage(course.course_id)}
               >
                 Страница курса
               </button>
               <button 
                 className="delete-btn"  
-                onClick={() => handleDelete(course.id)}
+                onClick={() => handleDelete(course.course_id)}
               >
                 Удалить
                 </button>

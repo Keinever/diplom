@@ -6,7 +6,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
     title: '', 
     description: '', 
     steps: [], 
-    startDate: '' 
+    due_date: '' 
   });
   const [showForm, setShowForm] = useState(isEditing || false);
   const [showStepForm, setShowStepForm] = useState(false);
@@ -50,7 +50,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
       title: stepContent.title,
       description: stepContent.description,
       type: stepType,
-      file: stepContent.file,
+      file: stepContent.file ? stepContent.file : null,
       assignmentTitle: stepType.includes('задание') ? stepContent.assignmentTitle : null
     };
 
@@ -100,7 +100,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!module.title || !module.startDate) return;
+    if (!module.title || !module.due_date) return;
     addModule(module);
     
     if (!isEditing) {
@@ -108,7 +108,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
         title: '', 
         description: '', 
         steps: [], 
-        startDate: '' 
+        due_date: '' 
       });
       setShowForm(false);
     }
@@ -156,8 +156,8 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
             <label>Дата начала*</label>
             <input
               type="date"
-              name="startDate"
-              value={module.startDate}
+              name="due_date"
+              value={module.due_date}
               onChange={handleModuleChange}
               required
             />
@@ -352,7 +352,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
             <button
               type="submit"
               className="submit-btn"
-              disabled={!module.title || !module.startDate}
+              disabled={!module.title || !module.due_date}
             >
               {isEditing ? 'Сохранить изменения' : 'Сохранить модуль'}
             </button>
