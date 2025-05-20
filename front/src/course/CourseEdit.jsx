@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ModuleCreation from './ModuleCreation.jsx';
 import './CourseEdit.css';
-import api, { get_csrf } from '../api';
+import api, {get_csrf} from "../api.js";
 
 const CourseEdit = () => {
   const { courseId } = useParams();
@@ -97,6 +97,24 @@ const CourseEdit = () => {
     
     try {
       const csrfToken = get_csrf();
+
+          console.log('Original data before mapping:', {
+      courseTitle: course.title,
+      courseDescription: course.description,
+      modules: course.modules.map(module => ({
+        id: module.id,
+        title: module.title,
+        description: module.description,
+        startDate: module.startDate,
+        steps: module.steps.map(step => ({
+          id: step.id,
+          title: step.title,
+          description: step.description,
+          type: step.type,
+          assignmentTitle: step.assignmentTitle
+        }))
+      }))
+    });
       const serverFormatData = {
         title: course.title,
         description: course.description,
@@ -115,7 +133,17 @@ const CourseEdit = () => {
         }))
       };
 
-      const response = await api.put(`/api/courses/${courseId}/`, serverFormatData, {
+       console.log('Sending PATCH request:', {
+      url: `/api/courses/${courseId}/`,
+      method: 'PATCH',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json'
+      },
+      data: serverFormatData
+    });
+
+      const response = await api.patch(`/api/courses/${courseId}/`, serverFormatData, {
         headers: {
           'X-CSRFToken': csrfToken,
           'Content-Type': 'application/json'
