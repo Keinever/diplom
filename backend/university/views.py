@@ -23,6 +23,11 @@ class CoursesViewSet(viewsets.ModelViewSet):
         print("Raw request data:", request.data)
         return super().create(request, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        # Для отладки
+        print("Raw request data:", request.data)
+        return super().update(request, *args, **kwargs)
+
 
 class ProgressViewSet(viewsets.ModelViewSet):
     queryset = Progress.objects.all()
