@@ -115,38 +115,37 @@ const CourseEdit = () => {
         }))
       }))
     });
-      const serverFormatData = {
-        title: course.title,
-        description: course.description,
-        modules: course.modules.map(module => ({
-          module_id: module.id,
-          title: module.title,
-          description: module.description,
-          due_date: module.startDate ? `${module.startDate}T00:00:00Z` : null,
-          steps: module.steps.map(step => ({
-            step_id: step.id,
-            title: step.title,
-            description: step.description,
-            exercise_type: step.type,
-            lab_number: step.assignmentTitle
-          }))
-        }))
-      };
+      const formData = new FormData();
+      formData.append('title', course.title);
+      formData.append('description', course.description);
+
+      course.modules.forEach((module, moduleIndex) => {
+        formData.append(`modules[${moduleIndex}][title]`, module.title || '');
+        formData.append(`modules[${moduleIndex}][module_id]`, module.id || '');
+        formData.append(`modules[${moduleIndex}][description]`, module.description || '');
+        formData.append(`modules[${moduleIndex}][due_date]`, module.due_date || '2024-12-31');
+        formData.append(`modules[${moduleIndex}][total_points]`, module.total_points || 100);
+
+        module.steps.forEach((step, stepIndex) => {
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][step_id]`, step.id);
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][title]`, step.title);
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][description]`, step.description);
+          formData.append(`modules[${moduleIndex}][steps][${stepIndex}][exercise_type]`, step.type);
+        });
+      });
 
        console.log('Sending PATCH request:', {
       url: `/api/courses/${courseId}/`,
       method: 'PATCH',
       headers: {
         'X-CSRFToken': csrfToken,
-        'Content-Type': 'application/json'
       },
-      data: serverFormatData
+      data: formData
     });
 
-      const response = await api.patch(`/api/courses/${courseId}/`, serverFormatData, {
+      const response = await api.put(`/api/courses/${courseId}/`, formData, {
         headers: {
           'X-CSRFToken': csrfToken,
-          'Content-Type': 'application/json'
         }
       });
 

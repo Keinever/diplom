@@ -38,8 +38,8 @@ class StepSerializer(serializers.ModelSerializer):
         model = Steps
         fields = '__all__'
         extra_kwargs = {
-            'step_id': {'read_only': True},
-            'module': {'read_only': True}
+            'module': {'read_only': True},
+            'step_id': {'read_only': False}
         }
 
     def create(self, validated_data):
@@ -64,7 +64,7 @@ class ModuleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'course': {'required': False},
-            'module_id': {'read_only': True}
+            'module_id': {'read_only': False}
         }
 
     def to_internal_value(self, data):
@@ -110,7 +110,6 @@ class ModuleSerializer(serializers.ModelSerializer):
 
             path = [p for p in key.replace(']', '').split('[') if p]
             set_nested(result, path, value)
-        print(result)
         result["steps"] = [v for step in  result.get("steps", []) for k,v in step.items()]
         print(result)
         return super().to_internal_value(result)
@@ -161,43 +160,17 @@ class CoursesSerializer(serializers.ModelSerializer):
 
         if 'modules' in validated_data:
             modules_data = validated_data.pop('modules')
+            Modules.objects.filter(course=instance).delete()
+
             for module_data in modules_data:
                 steps_data = module_data.pop('steps', [])
-                module_id = module_data.get('module_id', None)
-
-                if module_id:
-                    try:
-                        module = Modules.objects.get(module_id=module_id, course=instance)
-                    except Modules.DoesNotExist:
-                        module = None
-
-                    if module:
-                        module_serializer = ModuleSerializer(module, data=module_data, partial=True)
-                        module_serializer.is_valid(raise_exception=True)
-                        module = module_serializer.save()
-                    else:
-                        module_data.pop('module_id', None)
-                        module = Modules.objects.create(course=instance, **module_data)
-                else:
-                    module = Modules.objects.create(course=instance, **module_data)
+                module_id = module_data.pop('module_id', None)
+                module = Modules.objects.create(course=instance, **module_data)
+                Steps.objects.filter(module=module).delete()
 
                 for step_data in steps_data:
-                    step_id = step_data.get('step_id', None)
-                    if step_id:
-                        try:
-                            step = Steps.objects.get(step_id=step_id, module=module)
-                        except Steps.DoesNotExist:
-                            step = None
-
-                        if step:
-                            step_serializer = StepSerializer(step, data=step_data, partial=True)
-                            step_serializer.is_valid(raise_exception=True)
-                            step_serializer.save()
-                        else:
-                            step_data.pop('step_id', None)
-                            Steps.objects.create(module=module, **step_data)
-                    else:
-                        Steps.objects.create(module=module, **step_data)
+                    step_id = step_data.pop('step_id', None)
+                    Steps.objects.create(module=module, **step_data)
 
         return instance
 
