@@ -98,8 +98,8 @@ const CourseList = () => {
         {courses.map(course => (
           <div key={course.course_id} className="course-card">
             <div className="course-info">
-              <h2>{course.title}</h2>
-              <p className="course-description">{course.description}</p>
+              <h2>{'название: ' + course.title}</h2>
+              <p className="course-description">{'описание: ' + course.description}</p>
               <div className="course-meta">
                 <span>Студентов: {course.students.lenght}</span>
               </div>

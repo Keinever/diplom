@@ -18,7 +18,7 @@ import CoursePageForStudents from './course/CoursePageForStudents.jsx';
 import './App.css';
 import CoursesList from "./pages/Student/Courses/StudentCoursesList.jsx";
 import CoursesCreation from "./pages/Teacher/Courses/CoursesCreation.jsx";
-import CoursesPage from "./pages/Teacher/Courses/CoursesEdit.jsx";
+import CoursesPage from "./pages/Teacher/Courses/CoursesPage.jsx";
 import CoursesEdit from "./pages/Teacher/Courses/CoursesEdit.jsx";
 import StudentCoursesList from "./pages/Student/Courses/StudentCoursesList.jsx";
 import StudentCoursesPage from "./pages/Student/Courses/StudentCoursesPage.jsx";

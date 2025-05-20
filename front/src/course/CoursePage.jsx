@@ -124,7 +124,7 @@ const CoursePage = () => {
       </div>
 
       <div className="course-management">
-        <h2>Управление курсом</h2>
+        <h2 className='h22'>Управление курсом</h2>
         <div className="management-buttons">
           <button className="action-btn view-results" onClick={handleViewResults}>
             <span className="icon">📊</span>

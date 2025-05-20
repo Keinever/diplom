@@ -1,5 +1,5 @@
 .course-edit-container {
-    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 2rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -317,6 +317,10 @@
   .step-item h5 {
     margin: 0;
     font-size: 1.1rem;
+  }
+
+  .h22{
+    padding: 5px;
   }
   
   .step-description {
