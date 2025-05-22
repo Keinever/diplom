@@ -22,7 +22,8 @@ const CoursePage = () => {
             'Content-Type': 'application/json'
           }
         });
-
+        console.log(response);
+        
         const serverData = response.data;
         setCourseInfo({
           id: serverData.course_id,
@@ -49,8 +50,10 @@ const CoursePage = () => {
     navigate(`/courses/${courseId}/students/results`);
   };
 
-  const handleAddStudents = () => {
-    navigate(`/courses/${courseId}/students/add`);
+ const handleAddStudents = () => {
+    navigate(`/courses/${courseId}/students/add`, { 
+      state: { courseId } 
+    });
   };
 
   const handleRemoveStudents = () => {
@@ -124,7 +127,7 @@ const CoursePage = () => {
       </div>
 
       <div className="course-management">
-        <h2 className='h22'>Управление курсом</h2>
+        <h2>Управление курсом</h2>
         <div className="management-buttons">
           <button className="action-btn view-results" onClick={handleViewResults}>
             <span className="icon">📊</span>
