@@ -9,7 +9,7 @@ from django.db import transaction, IntegrityError
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from .models import *
 from .serializers import *
 
@@ -127,18 +127,37 @@ class StudentStepAttemptView(APIView):
     def get(self, request):
         student_id = request.query_params.get('student_id')
         step_id = request.query_params.get('step_id')
+        course_id = request.query_params.get('course_id')
 
-        if not student_id or not step_id:
+        if (not student_id or not step_id) and (not student_id or not course_id) :
             return Response(
-                {"error": "Both student_id and step_id are required"},
+                {"error": "Both student_id and step_id or course_id are required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        if course_id:
+            course = get_object_or_404(
+                Courses,
+                course_id=course_id
+            )
+            modules = get_list_or_404(Modules, course=course)
+            steps = []
+            attempts = []
+            for module in modules:
+                steps.extend(Steps.objects.filter(module=module, exercise_type="Задание"))
+            for step in steps:
+                attempts.extend(StudentStepAttempt.objects.filter(
+                    student=student_id,
+                    step=step.step_id
+                ))
+            print(attempts)
+            return Response({"data": attempts}, status=status.HTTP_200_OK)
 
-        attempt = get_object_or_404(
-            StudentStepAttempt,
-            student=student_id,
-            step=step_id
-        )
+        if step_id:
+            attempt = get_object_or_404(
+                StudentStepAttempt,
+                student=student_id,
+                step=step_id
+            )
 
         serializer = StudentStepAttemptSerializer(attempt)
         return Response(serializer.data)

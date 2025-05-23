@@ -33,6 +33,11 @@ class StepSerializer(serializers.ModelSerializer):
         write_only=True,
         validators=[FileExtensionValidator(allowed_extensions=['mov', 'avi', 'mp4', 'webm', 'mkv', 'pdf'])]
     )
+    attempts = StudentStepAttemptSerializer(
+        source='student_attempts',
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = Steps
