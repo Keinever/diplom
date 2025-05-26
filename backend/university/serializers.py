@@ -44,7 +44,7 @@ class StepSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'module': {'read_only': True},
-            'step_id': {'read_only': False}
+            'step_id': {'read_only': True}
         }
 
     def create(self, validated_data):
@@ -69,7 +69,7 @@ class ModuleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'course': {'required': False},
-            'module_id': {'read_only': False}
+            'module_id': {'read_only': True}
         }
 
     def to_internal_value(self, data):
