@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ConfigServer SYSTEM "rsc/ConfigServer.dtd">
+<ConfigServer>
+	<Name value ="DM_matrix-tranzition"/>
+	<Port value="13335"/>
+	<UserInfo login="dlc" password="dlc"/>
+</ConfigServer>

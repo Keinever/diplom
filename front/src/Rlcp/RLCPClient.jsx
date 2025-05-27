@@ -85,8 +85,7 @@ export default class RLCPClient {
     async check(solution) {
         const xmlBody = this.checkData(solution, this.text, this.code, this.instructions);
         const responseText = await this.sendRawRequest(xmlBody);
-        // return this.parseCheckResponse(responseText);
-        return Math.random() * 0.5 + 0.5;
+        return this.parseCheckResponse(responseText);
     }
 
     generateData() {

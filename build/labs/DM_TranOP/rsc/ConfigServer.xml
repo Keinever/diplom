@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ConfigServer SYSTEM "rsc/ConfigServer.dtd">
+<ConfigServer>
+	<Name value ="DM_TranOP"/>
+	<Port value="13325"/>
+	<UserInfo login="dlc" password="dlc"/>
+</ConfigServer>

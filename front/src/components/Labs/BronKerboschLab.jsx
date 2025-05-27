@@ -3,7 +3,7 @@ import cytoscape from 'cytoscape';
 import BronKerboschRLCP from "../../Rlcp/BronKerboschRLCP.jsx";
 
 const client = new BronKerboschRLCP({
-    url: '127.0.0.1:13336',
+    url: '127.0.0.1:13321',
     proxyUrl: 'http://localhost:3001/rlcp-proxy'
 });
 
@@ -144,8 +144,7 @@ const BronKerboschLab = () => {
             const dataString = `<!-- line:${mainTable.length} [${mainTableData}] vup:[${mvumTable.map(v => `"${v.join('')}"`)}] numG:${stabilityNumber} countG:${nvumCount} -->`;
 
             const result = await client.check(dataString);
-            const score = result * 100;
-            alert(`Результат: ${score.toFixed(1)}%`);
+            alert(`Результат: ${result}`);
             setIsSubmitted(true);
             clearInterval(timerRef.current);
         } catch(error) {

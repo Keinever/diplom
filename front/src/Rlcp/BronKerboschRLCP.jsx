@@ -22,6 +22,7 @@ export default class BronKerboschRLCP extends RLCPClient {
             if (!codeComment) throw new Error('No code comment found');
 
             const [nodes, edges] = codeComment.split('~~~').map(part => part.split(','));
+            console.log(edges)
 
             return {
                 status: parseInt(status, 10),

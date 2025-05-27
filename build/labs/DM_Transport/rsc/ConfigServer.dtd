@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT ConfigServer (Name, Port, UserInfo+)>
+<!ELEMENT Name EMPTY>
+<!ATTLIST Name
+	value CDATA #REQUIRED
+>
+<!ELEMENT Port EMPTY>
+<!ATTLIST Port
+	value CDATA #REQUIRED
+>
+<!ELEMENT UserInfo EMPTY>
+<!ATTLIST UserInfo
+	login CDATA #REQUIRED
+	password CDATA #REQUIRED
+>

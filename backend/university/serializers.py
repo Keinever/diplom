@@ -191,6 +191,11 @@ class SolutionsSerializer(serializers.ModelSerializer):
         model = Solutions
         fields = '__all__'
 
+    def validate_lab(self, value):
+        if value.exercise_type != "Задание":
+            raise serializers.ValidationError("Solutions can only be created for steps with exercise_type='Задание'")
+        return value
+
 
 class StudentsSerializer(serializers.ModelSerializer):
     attempts = StudentStepAttemptSerializer(

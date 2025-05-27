@@ -26,18 +26,11 @@ const RLCP_SERVER = {
     responseTimeout: 30000
 };
 
-const logger = {
-    info: (...args) => console.log(`[${new Date().toISOString()}]`, ...args),
-    error: (...args) => console.error(`[${new Date().toISOString()}]`, ...args)
-};
-
 app.post('/rlcp-proxy', async (req, res) => {
     const requestId = Math.random().toString(36).slice(2, 10);
     let socket = null;
 
     try {
-        logger.info(`[${requestId}] Request started`);
-
         const backUrl = req.headers.back_url;
         if (!backUrl) throw new Error('Missing back_url header');
 
@@ -52,12 +45,11 @@ app.post('/rlcp-proxy', async (req, res) => {
             throw new Error('Invalid request body format');
         }
 
-        socket = await connectToRlcp(host, port, requestId);
-        await sendRlcpRequest(socket, req.body, requestId);
+        socket = await connectToRlcp(host, port);
+        await sendRlcpRequest(socket, req.body);
         const response = await readRlcpResponse(socket);
 
         res.type('text/plain').send(response);
-        logger.info(`[${requestId}] Request completed successfully`);
 
     } catch (error) {
         handleError(error, res, requestId);
@@ -71,7 +63,7 @@ function parseBackUrl(backUrl) {
     return [host || '127.0.0.1', parseInt(port)];
 }
 
-async function connectToRlcp(host, port, requestId) {
+async function connectToRlcp(host, port) {
     return new Promise((resolve, reject) => {
         const socket = new net.Socket();
         let timeout = false;
@@ -83,29 +75,25 @@ async function connectToRlcp(host, port, requestId) {
 
         socket.connect({ host, port }, () => {
             clearTimeout(timer);
-            logger.info(`[${requestId}] Connected to RLCP server at ${host}:${port}`);
             resolve(socket);
         });
 
         socket.on('error', err => {
             clearTimeout(timer);
             if (!timeout) {
-                logger.error(`[${requestId}] Connection error to ${host}:${port}:`, err.message);
                 reject(err);
             }
         });
     });
 }
 
-async function sendRlcpRequest(socket, data, requestId) {
+async function sendRlcpRequest(socket, data) {
     return new Promise((resolve, reject) => {
         socket.write(data, 'utf8', err => {
             if (err) {
-                logger.error(`[${requestId}] Send error:`, err.message);
                 reject(err);
                 return;
             }
-            logger.info(`[${requestId}] Sent ${data.length} bytes`);
             socket.end(resolve);
         });
     });
@@ -114,10 +102,8 @@ async function sendRlcpRequest(socket, data, requestId) {
 async function readRlcpResponse(socket) {
     return new Promise((resolve, reject) => {
         let buffer = [];
-        let timeout = false;
 
         const timer = setTimeout(() => {
-            timeout = true;
             socket.destroy(new Error(`Response timeout (${RLCP_SERVER.responseTimeout}ms)`));
             reject(new Error('Response timeout'));
         }, RLCP_SERVER.responseTimeout);
@@ -146,25 +132,22 @@ async function readRlcpResponse(socket) {
 }
 
 function handleError(error, res, requestId) {
-    logger.error(`[${requestId}] Error:`, error.message);
     const status = error.message.includes('timeout') ? 504 :
         error.message.includes('ECONNREFUSED') ? 502 : 500;
     res.status(status).json({ error: 'RLCP_ERROR', message: error.message, requestId });
 }
 
-function safeSocketClose(socket, requestId) {
+function safeSocketClose(socket) {
     try {
         if (socket && !socket.destroyed) {
             socket.destroy();
-            logger.info(`[${requestId}] Connection closed`);
         }
     } catch (err) {
-        logger.error(`[${requestId}] Close error:`, err.message);
+        console.error(err);
     }
 }
 
 const PORT = 3001;
 app.listen(PORT, () => {
-    logger.info(`RLCP Proxy Server running on port ${PORT}`);
-    logger.info(`CORS enabled for origin: ${CORS_CONFIG.origin}`);
+    console.log(`Listening on ${PORT}`);
 });
