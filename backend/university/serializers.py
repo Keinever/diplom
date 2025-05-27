@@ -33,13 +33,18 @@ class StepSerializer(serializers.ModelSerializer):
         write_only=True,
         validators=[FileExtensionValidator(allowed_extensions=['mov', 'avi', 'mp4', 'webm', 'mkv', 'pdf'])]
     )
+    attempts = StudentStepAttemptSerializer(
+        source='student_attempts',
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = Steps
         fields = '__all__'
         extra_kwargs = {
             'module': {'read_only': True},
-            'step_id': {'read_only': False}
+            'step_id': {'read_only': True}
         }
 
     def create(self, validated_data):
@@ -64,7 +69,7 @@ class ModuleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'course': {'required': False},
-            'module_id': {'read_only': False}
+            'module_id': {'read_only': True}
         }
 
     def to_internal_value(self, data):
@@ -185,6 +190,11 @@ class SolutionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solutions
         fields = '__all__'
+
+    def validate_lab(self, value):
+        if value.exercise_type != "Задание":
+            raise serializers.ValidationError("Solutions can only be created for steps with exercise_type='Задание'")
+        return value
 
 
 class StudentsSerializer(serializers.ModelSerializer):

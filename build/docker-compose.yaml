@@ -31,5 +31,274 @@ services:
     depends_on:
       - postgres
 
+  base_service: &base-service
+    image: openjdk:8
+    working_dir: /app
+    command: "java -jar -Dfile.encoding=utf-8 ./server.jar"
+
+  dm_boolean:
+    <<: *base-service
+    container_name: dm_boolean
+    volumes:
+      - ./labs/DM_Boolean:/app
+    ports:
+      - "13337:13337"
+
+  dm_bron_kerbosch_lab:
+    <<: *base-service
+    container_name: dm_bron_kerbosch_lab
+    volumes:
+      - ./labs/DM_BronKerboschLab:/app
+    ports:
+      - "13321:13321"
+
+  dm_coloring_e:
+    <<: *base-service
+    container_name: dm_coloring_e
+    volumes:
+      - ./labs/DM_Coloring_E:/app
+    ports:
+      - "13317:13317"
+
+  dm_eulerlab:
+    <<: *base-service
+    container_name: dm_eulerlab
+    volumes:
+      - ./labs/DM_EulerLab:/app
+    ports:
+      - "13320:13320"
+
+  dm_flores:
+    <<: *base-service
+    container_name: dm_flores
+    volumes:
+      - ./labs/DM_Flores:/app
+    ports:
+      - "13312:13312"
+
+  dm_ford:
+    <<: *base-service
+    container_name: dm_ford
+    volumes:
+      - ./labs/DM_Ford:/app
+    ports:
+      - "13311:13311"
+
+  dm_fordfulk:
+    <<: *base-service
+    container_name: dm_fordfulk
+    volumes:
+      - ./labs/DM_FordFulk:/app
+    ports:
+      - "13338:13338"
+
+  dm_forwardcnn:
+    <<: *base-service
+    container_name: dm_forwardcnn
+    volumes:
+      - ./labs/DM_ForwardCNN:/app
+    ports:
+      - "13339:13339"
+
+  dm_fuzzysets:
+    <<: *base-service
+    container_name: dm_fuzzysets
+    volumes:
+      - ./labs/DM_FuzzySets:/app
+    ports:
+      - "13303:13303"
+
+  dm_fuzzysetsjs:
+    <<: *base-service
+    container_name: dm_fuzzysetsjs
+    volumes:
+      - ./labs/DM_FuzzySetsJS:/app
+    ports:
+      - "13329:13329"
+
+  dm_fuzzysetsjs_algebra:
+    <<: *base-service
+    container_name: dm_fuzzysetsjs_algebra
+    volumes:
+      - ./labs/DM_FuzzySetsJS_Algebra:/app
+    ports:
+      - "13330:13330"
+
+  dm_fuzzysetsjs_comparison:
+    <<: *base-service
+    container_name: dm_fuzzysetsjs_comparison
+    volumes:
+      - ./labs/DM_FuzzySetsJS_Comparison:/app
+    ports:
+      - "13331:13331"
+
+  dm_fuzzysetsr1r2:
+    <<: *base-service
+    container_name: dm_fuzzysetsr1r2
+    volumes:
+      - ./labs/DM_FuzzySetsR1R2:/app
+    ports:
+      - "13332:13332"
+
+  dm_gamma:
+    <<: *base-service
+    container_name: dm_gamma
+    volumes:
+      - ./labs/DM_Gamma:/app
+    ports:
+      - "13319:13319"
+
+  dm_graphdisassembling:
+    <<: *base-service
+    container_name: dm_graphdisassembling
+    volumes:
+      - ./labs/DM_GraphDisassembling:/app
+    ports:
+      - "13322:13322"
+
+  dm_heurcoloring:
+    <<: *base-service
+    container_name: dm_heurcoloring
+    volumes:
+      - ./labs/DM_HeurColoring:/app
+    ports:
+      - "13318:13318"
+
+  dm_hungary:
+    <<: *base-service
+    container_name: dm_hungary
+    volumes:
+      - ./labs/DM_Hungary:/app
+    ports:
+      - "13306:13306"
+
+  dm_isomorphism:
+    <<: *base-service
+    container_name: dm_isomorphism
+    volumes:
+      - ./labs/DM_Isomorphism:/app
+    ports:
+      - "13305:13305"
+
+  dm_kruskul:
+    <<: *base-service
+    container_name: dm_kruskul
+    volumes:
+      - ./labs/DM_Kruskul:/app
+    ports:
+      - "13314:13314"
+
+  dm_landdoig:
+    <<: *base-service
+    container_name: dm_landdoig
+    volumes:
+      - ./labs/DM_LandDoig:/app
+    ports:
+      - "13323:13323"
+
+  dm_magu:
+    <<: *base-service
+    container_name: dm_magu
+    volumes:
+      - ./labs/DM_Magu:/app
+    ports:
+      - "13315:13315"
+
+  dm_magucoloring:
+    <<: *base-service
+    container_name: dm_magucoloring
+    volumes:
+      - ./labs/DM_MaguColoring:/app
+    ports:
+      - "13316:13316"
+
+  dm_perceptronbackpropagation:
+    <<: *base-service
+    container_name: dm_perceptronbackpropagation
+    volumes:
+      - ./labs/DM_PerceptronBackpropagation:/app
+    ports:
+      - "13333:13333"
+
+  dm_perceptronsignal:
+    <<: *base-service
+    container_name: dm_perceptronsignal
+    volumes:
+      - ./labs/DM_PerceptronSignal:/app
+    ports:
+      - "13334:13334"
+
+  dm_petri:
+    <<: *base-service
+    container_name: dm_petri
+    volumes:
+      - ./labs/DM_Petri:/app
+    ports:
+      - "13326:13326"
+
+  dm_prim:
+    <<: *base-service
+    container_name: dm_prim
+    volumes:
+      - ./labs/DM_Prim:/app
+    ports:
+      - "13313:13313"
+
+  dm_recurrentneuralnet:
+    <<: *base-service
+    container_name: dm_recurrentneuralnet
+    volumes:
+      - ./labs/DM_RecurrentNeuralNet:/app
+    ports:
+      - "13340:13340"
+
+  dm_sets:
+    <<: *base-service
+    container_name: dm_sets
+    volumes:
+      - ./labs/DM_Sets:/app
+    ports:
+      - "13336:13336"
+
+  dm_tranbp:
+    <<: *base-service
+    container_name: dm_tranbp
+    volumes:
+      - ./labs/DM_TranBP:/app
+    ports:
+      - "13324:13324"
+
+  dm_tranop:
+    <<: *base-service
+    container_name: dm_tranop
+    volumes:
+      - ./labs/DM_TranOP:/app
+    ports:
+      - "13325:13325"
+
+  dm_transport:
+    <<: *base-service
+    container_name: dm_transport
+    volumes:
+      - ./labs/DM_Transport:/app
+    ports:
+      - "13304:13304"
+
+  dm_wave:
+    <<: *base-service
+    container_name: dm_wave
+    volumes:
+      - ./labs/DM_Wave:/app
+    ports:
+      - "13310:13310"
+
+  dm_matrix_tranzition:
+    <<: *base-service
+    container_name: dm_matrix_tranzition
+    volumes:
+      - ./labs/DM_matrix-tranzition:/app
+    ports:
+      - "13335:13335"
+
 volumes:
   django-pg2:

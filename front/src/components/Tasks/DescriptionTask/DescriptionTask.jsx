@@ -1,3 +1,5 @@
+import Pdf from '../A_A_Fardzinov_review_2.pdf'
+
 export default function DescriptionTask({ description, instraction_file}) {
     return (
         <div className="pt-5">

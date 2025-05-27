@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ConfigServer SYSTEM "rsc/ConfigServer.dtd">
+<ConfigServer>
+	<Name value ="DB_Bool"/>
+	<Port value="13337"/>
+	<UserInfo login="dlc" password="dlc"/>
+</ConfigServer>

@@ -44,20 +44,6 @@ class Progress(models.Model):
         db_table = 'Progress'
 
 
-class Solutions(models.Model):
-    solution_id = models.AutoField(primary_key=True)
-    student = models.ForeignKey('StudentProfile', models.CASCADE)
-    lab = models.ForeignKey(Modules, models.DO_NOTHING)
-    solution_data = models.TextField(blank=True, null=True)
-    grade = models.IntegerField(blank=True, null=True)
-    submitted_at = models.DateTimeField(blank=True, null=True)
-    rating = models.FloatField(blank=True, null=True)
-    attempts_left = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        db_table = 'Solutions'
-
-
 class Steps(models.Model):
     step_id = models.AutoField(primary_key=True)
     title = models.TextField()
@@ -78,6 +64,16 @@ class Steps(models.Model):
     class Meta:
         db_table = 'Steps'
 
+
+class Solutions(models.Model):
+    solution_id = models.AutoField(primary_key=True)
+    student = models.ForeignKey('StudentProfile', models.CASCADE)
+    lab = models.ForeignKey(Steps, models.DO_NOTHING)
+    grade = models.IntegerField(blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+    class Meta:
+        db_table = 'Solutions'
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):

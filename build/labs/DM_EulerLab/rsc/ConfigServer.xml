@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ConfigServer SYSTEM "rsc/ConfigServer.dtd">
+<ConfigServer>
+	<Name value ="SomeServer"/>
+	<Port value="13320"/>
+	<UserInfo login="dlc" password="dlc"/>
+</ConfigServer>
