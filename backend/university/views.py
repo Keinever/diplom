@@ -149,8 +149,8 @@ class StudentStepAttemptView(APIView):
                     student=student_id,
                     step=step.step_id
                 ))
-            print(attempts)
-            return Response({"data": attempts}, status=status.HTTP_200_OK)
+            serializer = StudentStepAttemptSerializer(attempts, many=True)
+            return Response({"data": serializer.data}, status=status.HTTP_200_OK)
 
         if step_id:
             attempt = get_object_or_404(
@@ -206,7 +206,7 @@ class StudentCourseView(APIView):
         student = get_object_or_404(StudentProfile, pk=student_id)
         course = get_object_or_404(Courses, pk=course_id)
 
-        course_st, created = StudentCourse.objects.get_or_create(
+        course_st = StudentCourse.objects.create(
             student=student,
             course=course,
         )
@@ -214,7 +214,7 @@ class StudentCourseView(APIView):
         serializer = StudentCourseSerializer(course_st)
         return Response(
             serializer.data,
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+            status=status.HTTP_201_CREATED
         )
 
     def delete(self, request):
