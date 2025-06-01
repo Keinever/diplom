@@ -15,6 +15,14 @@ class TeachersSerializer(serializers.ModelSerializer):
 
 
 class StudentStepAttemptSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['step'] = {
+            "title": instance.step.title,
+            "description": instance.step.description,
+        }
+        return representation
+
     class Meta:
         model = StudentStepAttempt
         fields = ['attempts', 'student', 'step']
