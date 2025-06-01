@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ModuleCreation from './ModuleCreation.jsx';
 import './CourseEdit.css';
 import api, {get_csrf} from "../api.js";
 
 const CourseEdit = () => {
   const { courseId } = useParams();
+  const navigate = useNavigate();
   const [course, setCourse] = useState({
     title: '',
     description: '',
@@ -91,30 +92,16 @@ const CourseEdit = () => {
     }));
   };
 
+  const handleBackClick = () => {
+    navigate(`/courses/${courseId}`);
+  };
+
   const handleSubmit = async () => {
     setIsSaving(true);
     setError(null);
     
     try {
       const csrfToken = get_csrf();
-
-          console.log('Original data before mapping:', {
-      courseTitle: course.title,
-      courseDescription: course.description,
-      modules: course.modules.map(module => ({
-        id: module.id,
-        title: module.title,
-        description: module.description,
-        startDate: module.startDate,
-        steps: module.steps.map(step => ({
-          id: step.id,
-          title: step.title,
-          description: step.description,
-          type: step.type,
-          assignmentTitle: step.assignmentTitle
-        }))
-      }))
-    });
       const formData = new FormData();
       formData.append('title', course.title);
       formData.append('description', course.description);
@@ -134,23 +121,13 @@ const CourseEdit = () => {
         });
       });
 
-       console.log('Sending PATCH request:', {
-      url: `/api/courses/${courseId}/`,
-      method: 'PATCH',
-      headers: {
-        'X-CSRFToken': csrfToken,
-      },
-      data: formData
-    });
-
-      const response = await api.put(`/api/courses/${courseId}/`, formData, {
+      await api.put(`/api/courses/${courseId}/`, formData, {
         headers: {
           'X-CSRFToken': csrfToken,
         }
       });
 
-      console.log('Курс успешно обновлен:', response.data);
-      alert('Изменения успешно сохранены!');
+      navigate('/teacher/courses');
     } catch (err) {
       console.error('Ошибка:', err);
       setError(err.response?.data?.message || 'Ошибка при сохранении курса');
@@ -189,6 +166,9 @@ const CourseEdit = () => {
   return (
     <div className="course-edit-container">
       <header className="course-header">
+        <button className="student-action-btn back" onClick={handleBackClick}>
+           Вернуться на страницу курса
+        </button>
         <h1>Редактирование курса: {course.title}</h1>
         {error && <div className="error-message">{error}</div>}
       </header>

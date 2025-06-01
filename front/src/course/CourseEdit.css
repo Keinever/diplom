@@ -15,6 +15,9 @@
     font-size: 2.2rem;
     color: #2c3e50;
     margin-bottom: 1rem;
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
   }
   
   .error-message {
@@ -257,7 +260,8 @@
     padding: 1.5rem;
     border-bottom: 1px solid #eee;
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
     align-items: center;
   }
   
@@ -317,10 +321,6 @@
   .step-item h5 {
     margin: 0;
     font-size: 1.1rem;
-  }
-
-  .h22{
-    padding: 5px;
   }
   
   .step-description {

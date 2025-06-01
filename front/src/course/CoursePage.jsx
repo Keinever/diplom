@@ -104,10 +104,6 @@ const CoursePage = () => {
 
       <div className="course-meta-info">
         <div className="meta-item">
-          <span className="meta-label">Преподаватель:</span>
-          <span className="meta-value">{courseInfo.teacher}</span>
-        </div>
-        <div className="meta-item">
           <span className="meta-label">Количество студентов:</span>
           <span className="meta-value">{courseInfo.studentsCount}</span>
         </div>

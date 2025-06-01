@@ -20,7 +20,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
   const [editingStepIndex, setEditingStepIndex] = useState(null);
 
   const assignmentOptions = ['Задание 1', 'Задание 2', 'Задание 3'];
-  const stepTypes = ['лекция', 'обучающие задание', 'аттестационное задание'];
+  const stepTypes = ['Лекция', 'Задание'];
 
   useEffect(() => {
     if (initialModule) {
@@ -297,7 +297,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
                   </div>
                 )}
 
-                {(stepType === 'обучающие задание' || stepType === 'аттестационное задание') && (
+                {(stepType === 'Задание') && (
                   <div className="form-group">
                     <label>Выберите задание</label>
                     <select

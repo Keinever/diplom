@@ -21,7 +21,7 @@ const CourseList = () => {
       }
     });
 
-     console.log('Ответ от сервера:', response.data);
+    console.log('Ответ от сервера:', response.data);
     setCourses(response.data.results);
     
     return response.data;
@@ -62,7 +62,6 @@ const CourseList = () => {
         console.error('Ошибка при удалении ученика:', error);
     }
 };
-
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -101,7 +100,7 @@ const CourseList = () => {
               <h2>{'название: ' + course.title}</h2>
               <p className="course-description">{'описание: ' + course.description}</p>
               <div className="course-meta">
-                <span>Студентов: {course.students.lenght}</span>
+                <span>Студентов: {course.students.length}</span>
               </div>
             </div>
             <div className="course-actions">

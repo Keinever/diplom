@@ -24,9 +24,13 @@ body {
 }
 
 .student-list-container {
-  max-width: 900px;
+  width: 100%;
   margin: 2rem auto;
   background: white;
+  margin-left: 2%;
+  margin-right: 2%;
+  margin-top:  2%;
+  margin-bottom: 2%;
   padding: 2rem;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
@@ -268,6 +272,31 @@ body {
   margin-right: 0.5rem;
 }
 
+.back-button-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.student-action-btn.back {
+  background-color: var(--gray-color);
+  padding: 0.6rem 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.student-action-btn.back:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.student-action-btn.back::before {
+  content: '←';
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .student-list-container {
     padding: 1.5rem;
@@ -289,6 +318,76 @@ body {
     flex-wrap: wrap;
   }
 }
+
+.attempts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.attempt-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.attempt-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: rgba(67, 97, 238, 0.2);
+}
+
+.attempt-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.attempt-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.student-action-btn {
+  background-color: #4361ee;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.student-action-btn:hover {
+  background-color: #3f37c9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.student-action-btn.back {
+  background-color: #6c757d;
+}
+
+.student-action-btn.back:hover {
+  background-color: #5a6268;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
 
 /* Микро-анимации */
 @keyframes fadeIn {

@@ -20,6 +20,7 @@ class StudentStepAttemptSerializer(serializers.ModelSerializer):
         representation['step'] = {
             "title": instance.step.title,
             "description": instance.step.description,
+            "step_id": instance.step.step_id
         }
         return representation
 
