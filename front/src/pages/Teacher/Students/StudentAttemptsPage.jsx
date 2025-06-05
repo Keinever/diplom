@@ -59,7 +59,7 @@ const StudentAttemptsPage = () => {
   };
 
 const handleAddAttempt = async (stepId) => {
-  console.log('Пытаемся добавить попытку для stepId:', stepId); // Добавьте логирование
+  console.log('Пытаемся добавить попытку для stepId:', stepId); 
   
   if (!stepId || isAddingAttempt) {
     console.log('Отмена: stepId отсутствует или идет процесс добавления ');
@@ -150,7 +150,7 @@ const handleAddAttempt = async (stepId) => {
           Вернуться на страницу курса
         </button>
       </div>
-      <h1 className="student-list-title">Студенты: {studentName}</h1>
+      <h1 className="student-list-title">Студент: {studentName}</h1>
       
       {!attempts || attempts.length === 0 ? (
         <p className="empty-message">Нет данных о заданиях</p>

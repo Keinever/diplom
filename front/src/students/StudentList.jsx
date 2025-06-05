@@ -24,7 +24,7 @@ const StudentList = ({
       <div className="student-list-container">
         <div className="back-button-wrapper">
           <button className="student-action-btn back" onClick={handleBackClick}>
-            ← Назад
+           Вернуться на страницу курса
           </button>
         </div>
         <h1 className="student-list-title">{title}</h1>
@@ -38,7 +38,7 @@ const StudentList = ({
       <div className="student-list-container">
         <div className="back-button-wrapper">
           <button className="student-action-btn back" onClick={handleBackClick}>
-            ← Назад
+            Вернуться на страницу курса
           </button>
         </div>
         <h1 className="student-list-title">{title}</h1>

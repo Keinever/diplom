@@ -26,7 +26,7 @@ const RemoveStudentsPage = () => {
 
         const parsedStudents = response.data.results
           .filter(student => 
-            student.courses?.includes(parseInt(courseId)) // Фильтр на наличие курса
+            student.courses?.includes(parseInt(courseId))
           )
           .map(student => ({
             id: student.user,
@@ -65,7 +65,6 @@ const RemoveStudentsPage = () => {
         }
       });
       
-      // Обновляем список студентов
       setStudents(prevStudents => 
         prevStudents.filter(student => student.id !== studentId)
       );

@@ -1,4 +1,3 @@
-// AddStudentsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import StudentList from '../../../students/StudentList.jsx';
@@ -67,7 +66,6 @@ const AddStudentsPage = () => {
         }
       );
       
-      // Обновляем список студентов после успешного добавления
       setStudents(prevStudents => 
         prevStudents.filter(student => student.id !== studentId)
       );

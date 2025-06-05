@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from 'js-cookie';
+import { data } from "react-router-dom";
 
 const apiUrl = "http://localhost:8000";
 
@@ -16,5 +17,7 @@ const api = axios.create({
 
 api.get('/api/csrf_token/')
     .catch(error => console.error('CSRF token fetch error:', error));
+
+api.post('/')
 
 export default api;

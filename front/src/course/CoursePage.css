@@ -179,14 +179,12 @@
   }
 }
 
-/* Иконка (опционально) */
 .edit-course-btn svg {
   margin-right: 0.5rem;
   width: 16px;
   height: 16px;
 }
 
-/* Для мобильных устройств */
 @media (max-width: 768px) {
   .edit-course-btn {
     padding: 0.5rem 1.2rem;

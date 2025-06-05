@@ -19,7 +19,7 @@ const ModuleCreation = ({ addModule, initialModule, isEditing = false }) => {
   });
   const [editingStepIndex, setEditingStepIndex] = useState(null);
 
-  const assignmentOptions = ['Задание 1', 'Задание 2', 'Задание 3'];
+  const assignmentOptions = ['Лабораторная "Алгоритм Брона-Кербоша"', 'Лабораторная 2', 'Лабораторная 3'];
   const stepTypes = ['Лекция', 'Задание'];
 
   useEffect(() => {

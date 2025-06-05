@@ -53,7 +53,7 @@ const AddAttemptsPage = () => {
       state: {
         studentId,
         courseId,
-        studentName: `${lastName} ${firstName}` // Передаём полное имя студента
+        studentName: `${lastName} ${firstName}` 
       }
     });
   };

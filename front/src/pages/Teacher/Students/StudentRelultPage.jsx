@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import api, { get_csrf } from '../../../api';
-import './StudentPage.css'
+import './StudentPage.css';
 
 const StudentResultPage = () => {
-  const { studentId } = useParams();
-  const { courseId } = useParams();
+  const { studentId, courseId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [steps, setSteps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,6 +14,8 @@ const StudentResultPage = () => {
   const { state } = location;
   const receivedStudentId = state?.studentId || studentId;
   const receivedCourseId = state?.courseId || courseId;
+  const firstName = state?.firstName || '';
+  const lastName = state?.lastName || '';
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -32,8 +34,14 @@ const StudentResultPage = () => {
             course_id: receivedCourseId
           }
         });
-
-        setSteps(response.data.steps || []);
+        const stepsData = response.data?.data || [];
+        setSteps(stepsData.map(item => ({
+          id: item.step?.title || Math.random().toString(36).substring(2, 9),
+          title: item.step?.title || 'Без названия',
+          description: item.step?.description || 'Нет описания',
+          progress: item.result || 0, 
+        })));
+        
       } catch (err) {
         console.error('Ошибка при загрузке результатов:', err);
         setError('Не удалось загрузить результаты студента');
@@ -45,10 +53,19 @@ const StudentResultPage = () => {
     fetchResults();
   }, [receivedStudentId, receivedCourseId]);
 
+  const handleBackClick = () => {
+    navigate(`/courses/${courseId}/students/results`);
+  };
+
   if (isLoading) {
     return (
-      <div className="results-container">
-        <h1 className="results-title">Результаты студента</h1>
+      <div className="student-results-container">
+        <div className="back-button-wrapper">
+          <button className="student-action-btn back" onClick={handleBackClick}>
+            ← Назад к списку студентов
+          </button>
+        </div>
+        <h1 className="student-results-title">Студент: {firstName} {lastName}</h1>
         <div className="loading-spinner"></div>
       </div>
     );
@@ -56,8 +73,13 @@ const StudentResultPage = () => {
 
   if (error) {
     return (
-      <div className="results-container">
-        <h1 className="results-title">Результаты студента</h1>
+      <div className="student-results-container">
+        <div className="back-button-wrapper">
+          <button className="student-action-btn back" onClick={handleBackClick}>
+            ← Назад к списку студентов
+          </button>
+        </div>
+        <h1 className="student-results-title">Студент: {firstName} {lastName}</h1>
         <p className="error-message">{error}</p>
         <button 
           className="retry-button"
@@ -70,41 +92,36 @@ const StudentResultPage = () => {
   }
 
   return (
-    <div className="results-container">
-      <h1 className="results-title">
-        Результаты студента ID: {receivedStudentId} (Курс ID: {receivedCourseId})
-      </h1>
+    <div className="student-results-container">
+      <div className="back-button-wrapper">
+        <button className="student-action-btn back" onClick={handleBackClick}>
+          Назад к списку студентов
+        </button>
+      </div>
+      <h1 className="student-results-title">Студент: {firstName} {lastName}</h1>
       
       {steps.length === 0 ? (
         <p className="empty-message">Нет данных о шагах курса</p>
       ) : (
         <div className="steps-list">
           {steps.map(step => (
-            <div key={step.id} className="step-item">
-              <div className="step-info">
+            <div key={step.id} className="step-card">
+              <div className="step-header">
                 <h3 className="step-title">{step.title}</h3>
                 <p className="step-description">{step.description}</p>
-                
-                {step.attempts?.length > 0 ? (
-                  <div className="attempts-list">
-                    {step.attempts.map((attempt, index) => (
-                      <div key={attempt.id} className="attempt-item">
-                        <div className="attempt-header">
-                          <span className="attempt-number">Попытка {index + 1}</span>
-                          <span className="attempt-date">
-                            {new Date(attempt.created_at).toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="attempt-details">
-                          <span>Статус: {attempt.status}</span>
-                          <span>Оценка: {attempt.score || 'не оценено'}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="no-attempts">Нет выполненных попыток</p>
-                )}
+              </div>
+              
+              <div className="progress-container">
+                <div className="progress-labels">
+                  <span>Результат:</span>
+                  <span className="progress-value">{step.progress}%</span>
+                </div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ width: `${step.progress}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
           ))}

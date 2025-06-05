@@ -149,9 +149,6 @@ class StudentStepResult(models.Model):
     step = models.ForeignKey(Steps, on_delete=models.CASCADE, related_name="step_results")
     result = models.PositiveIntegerField(default=0)
 
-    class Meta:
-        unique_together = [['student', 'step']]
-
 class StudentCourse(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name="students_courses")
     course = models.ForeignKey(Courses, on_delete=models.CASCADE, related_name="courses_student")

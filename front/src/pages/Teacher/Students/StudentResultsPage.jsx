@@ -48,11 +48,14 @@ const StudentResultsPage = () => {
     fetchStudents();
   }, [courseId]);
 
-  const handleViewStudentResults = (studentId) => {
+  const handleViewStudentResults = (studentId, firstName, lastName) => {
     navigate(`/courses/${courseId}/students/results/${studentId}`, {
       state: {
         studentId,
-        courseId
+        courseId,
+        studentName: `${lastName} ${firstName}`, // Передаем полное имя
+        firstName, // Добавляем имя отдельно
+        lastName   // Добавляем фамилию отдельно
       }
     });
   };
@@ -63,7 +66,10 @@ const StudentResultsPage = () => {
       <StudentList
         title="Результаты студентов"
         actionText="Просмотр результатов"
-        onAction={handleViewStudentResults}
+        onAction={(studentId) => {
+          const student = students.find(s => s.id === studentId);
+          handleViewStudentResults(studentId, student.firstName, student.lastName);
+        }}
         students={students}
         isLoading={isLoading}
         error={error}

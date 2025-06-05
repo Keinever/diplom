@@ -2,6 +2,7 @@ import React from 'react';
 import './StudentStyle.css';
 
 const Student = ({ student, actionText, onAction }) => {
+  console.log(student.id)
   return (
     <div className="student-card">
       <div className="student-info">
