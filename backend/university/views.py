@@ -191,6 +191,70 @@ class StudentStepAttemptView(APIView):
         )
 
 
+class StudentStepResultView(APIView):
+    def get(self, request):
+        student_id = request.query_params.get('student_id')
+        step_id = request.query_params.get('step_id')
+        course_id = request.query_params.get('course_id')
+
+        if (not student_id or not step_id) and (not student_id or not course_id) :
+            return Response(
+                {"error": "Both student_id and step_id or course_id are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if course_id:
+            course = get_object_or_404(
+                Courses,
+                course_id=course_id
+            )
+            modules = get_list_or_404(Modules, course=course)
+            steps = []
+            results = []
+            for module in modules:
+                steps.extend(Steps.objects.filter(module=module, exercise_type="Задание"))
+            for step in steps:
+                results.extend(StudentStepResult.objects.filter(
+                    student=student_id,
+                    step=step.step_id
+                ))
+
+        if step_id:
+            results = get_list_or_404(
+                StudentStepResult,
+                student=student_id,
+                step=step_id
+            )
+
+        serializer = StudentStepAttemptSerializer(results, many=True)
+        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        student_id = request.data.get('student')
+        step_id = request.data.get('step')
+        result = request.data.get('result')
+
+        if not student_id or not step_id:
+            return Response(
+                {"error": "Both student and step are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        student = get_object_or_404(StudentProfile, pk=student_id)
+        step = get_object_or_404(Steps, pk=step_id)
+
+        result = StudentStepResult.objects.create(
+            student=student,
+            step=step,
+            result=result
+        )
+
+        serializer = StudentStepResultSerializer(result)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+
 class StudentCourseView(APIView):
     parser_classes = [JSONParser]
     def post(self, request):
